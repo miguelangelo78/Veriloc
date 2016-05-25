@@ -12,7 +12,7 @@ Veriloc is a C compiler that converts C code to normal Verilog code.
 # How to Run
 
 * In order to run the compiler simply go to 'bin' and execute:
- `> veriloc filename`.
+ `veriloc filename`.
 
-* You can also do this by going into thefolder 'testbench', where you can **drag and drop** a test file into the script 'run_test.pyc'. The test file's **filename** must have this format: test_yourname.txt.
+* You can also do this by going into the folder 'testbench', where you can **drag and drop** a test file into the script 'run_test.pyc'. The test file's **filename** must have this format: test_yourname.txt.
 **Example filenames**: test1, test_mytest.txt, test_trythis.vc
