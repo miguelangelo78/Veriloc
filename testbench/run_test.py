@@ -20,7 +20,7 @@ def show_help(run):
 	# Clean up test_files array:
 	for x in range(len(test_files)):
 		for i in range(len(test_files)):
-			if(test_files[i].find(".py") != -1):
+			if(test_files[i].find(".py") != -1 or not test_files[i].startswith("test")):
 				test_files.remove(test_files[i])
 				break
 	# Show test files:
