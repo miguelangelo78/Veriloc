@@ -1,7 +1,7 @@
 #define PI 3.14
 
 void global_func() {
-	
+
 }
 
 int global_add(int n1, int n2) {
@@ -51,7 +51,7 @@ testbench Test {
 private:
 	wire mywire;
 	reg myreg;
-	
+
 	Mymodule module;
 public:
 	Test() {

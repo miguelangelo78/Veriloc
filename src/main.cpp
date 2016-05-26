@@ -20,7 +20,7 @@ int main(int argc, char ** argv) {
 }
 
 void yyerror(const char * str) {
-	cout << "!! PARSE ERROR !! Message: \"" << str << "\"" << endl;
-	cout << "\n\nPress any key to exit...";
+	printf("\n\n>> ERROR: %s in line %d at: \"%s\"", str, yylineno + 1, yytext);
+	printf("\n\nPress enter to exit...");
 	exit(-1);
 }

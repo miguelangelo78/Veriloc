@@ -1,39 +1,46 @@
 %{
-#include <headers.h>
+	#include <headers.h>
+	int yylineno;
 %}
 
 %%
 	/* Single characters: */
-;				return SEMICOLON;
-":"				return COLON;
-"\("				return LPAREN;
-"\)"				return RPAREN;
-"{"				return LBRACKET;
-"}"				return RBRACKET;
-"'"				return ACCENT;
-"/"				return RSLASH;
-"\\"				return LSLASH;
-"\["				return LSBRACKET;
-"\]"				return RSBRACKET;
+";"				return ';';
+":"				return ':';
+"("				return '(';
+")"				return ')';
+"{"				return '{';
+"}"				return '}';
+"'"				return '\'';
+"/"				return '/';
+"\\"				return '\\';
+"["				return '[';
+"]"				return ']';
+"_"				return '_';
+"."				return '.';
+"?"				return '?';
+","				return ',';
 
 	/* Operators: */
-"="				return EQUAL;
-"+"				return PLUS;
-"-"				return MINUS;
-"*"				return MULTIPLY;
-"/"				return DIVIDE;
+"="				return '=';
+"=="				return LEQUAL;
+"!="				return LDIFF;
+"+"				return '+';
+"-"				return '-';
+"*"				return '*';
+"%"				return '%';
 "&&"				return LAND;
 "||"				return LOR;
-"!"				return LNOT;
-"&"				return AND;
-"|"				return OR;
-"^"				return XOR;
-"~"				return NOT;
-">"				return BIGGER;
-"<"				return SMALLER;
-
-	/* Macros: */
-"#"				return MACRO;
+"!"				return '!';
+"&"				return '&';
+"|"				return '|';
+"^"				return '^';
+"~"				return '~';
+">"				return '>';
+"<"				return '<';
+">="				return BIGGEREQUAL;
+"<="				return SMALLEREQUAL;
+"#"				return '#';
 
 	/* Keywords: */
 void				return TVOID;
@@ -93,10 +100,11 @@ posedge			return POSEDGE;
 negedge			return NEGEDGE;
 
 	/* Variables/numbers: */
-[0-9]+\.[0-9]+  	{ yylval.fval = atof(yytext); return FLOAT; 		}
-[0-9]+          	{ yylval.ival = atoi(yytext); return INT; 		}
-\".+?[a-zA-Z0-9]+\" { yylval.sval = strdup(yytext); return STRING; 	}
-.				;
-[ \t\n]        	;
+[0-9]+\.[0-9]+  			{ yylval.fval = atof(yytext); return FLOAT; }
+[0-9]+          			{ yylval.ival = atoi(yytext); return INT; }
+\".+?[a-zA-Z0-9_]?.+\"		{ yylval.sval = strdup(yytext); return STRING; }
+[a-zA-Z0-9_]+ 				{ yylval.sval = strdup(yytext); return IDENTIFIER; }
+.						;
+[ \t\n]        			yylineno++;
 
 %%

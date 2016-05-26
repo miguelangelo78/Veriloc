@@ -1,5 +1,5 @@
 %{
-#include <headers.h>
+	#include <headers.h>
 %}
 
 %union {
@@ -8,105 +8,96 @@
 	char * sval;
 	char cval;
 }
-	/* Single characters: */
-%token SEMICOLON
-%token COLON
-%token LPAREN
-%token RPAREN
-%token LBRACKET
-%token RBRACKET
-%token ACCENT
-%token RSLASH
-%token LSLASH
-%token LSBRACKET
-%token RSBRACKET
 
-	/* Operators: */
-%token EQUAL
-%token PLUS
-%token MINUS
-%token MULTIPLY
-%token DIVIDE
-%token LAND
-%token LOR
-%token LNOT
-%token AND
-%token OR
-%token XOR
-%token NOT
-%token BIGGER
-%token SMALLER
+	/* Token Operators: */
+%token LEQUAL LDIFF LAND LOR BIGGEREQUAL SMALLEREQUAL
 
-	/* Macros: */
-%token MACRO
-
-	/* Keywords: */
-%token TVOID
-%token TINT
-%token TCHAR
-%token TFLOAT
-%token TDOUBLE
-%token TREG
-%token TWIRE
-%token TCONST
-%token SIGNED
-%token TUNSIGNED
-%token TLONG
-%token TSHORT
-%token TYPEDEF
-%token STATIC
-
-%token ENUM
-%token UNION
-%token STRUCT
-
-%token DEFINE
-%token INCLUDE
-%token PRAGMA
-%token EXTERN
-%token INLINE
-%token RETURN
-
+	/* Token Keywords: */
+%token TVOID TINT TCHAR TFLOAT TDOUBLE TREG TWIRE TCONST SIGNED
+%token TUNSIGNED TLONG TSHORT TYPEDEF STATIC
+%token ENUM UNION STRUCT
+%token DEFINE INCLUDE PRAGMA EXTERN INLINE RETURN
 %token SIZEOF
+%token IF ELSE ELSIF SWITCH CASE DEFAULT GOTO
+%token WHILE FOR BREAK CONTINUE DO
+%token PUBLIC PRIVATE PROTECTED
+%token MODULE TESTBENCH ASSIGN ALWAYS INPUT OUTPUT CONFIG FORCE POSEDGE NEGEDGE
+%token <ival> INT  <fval> FLOAT <sval> STRING <sval> IDENTIFIER
 
-%token IF
-%token ELSE
-%token ELSIF
-%token SWITCH
-%token CASE
-%token DEFAULT
-%token GOTO
-
-%token WHILE
-%token FOR
-%token BREAK
-%token CONTINUE
-%token DO
-
-%token PUBLIC
-%token PRIVATE
-
-%token MODULE
-%token TESTBENCH
-%token ASSIGN
-%token ALWAYS
-%token INPUT
-%token OUTPUT
-%token CONFIG
-%token FORCE
-%token POSEDGE
-%token NEGEDGE
-
-%token <ival> INT
-%token <fval> FLOAT
-%token <sval> STRING
-
+%start source
 %%
-input:
-	input INT 		{ cout<<"int: "<<$2<<"\n";	}
-	| input FLOAT 		{ cout<<"float: "<<$2<<"\n";	}
-	| input STRING 	{ cout<<"string: "<<$2<<"\n";	};
-	| INT 			{ cout<<"int: "<<$1<<"\n";	}
-	| FLOAT 			{ cout<<"float: "<<$1<<"\n";	}
-	| STRING 			{ cout<<"string: "<<$1<<"\n";	};
+source: | source module | source testbench;
+
+	/************** Module grammar: **************/
+module:
+	module_head '}' ';';
+	| module_head module_body '}' ';';
+	| module_head module_access '}' ';';
+	| module_head module_access module_body '}' ';';
+	| module_head module_access module_body module_access '}' ';';
+	| module_head module_access module_body module_access module_body '}' ';';
+	| module_head module_body module_access module_body module_access module_body '}' ';';
+	| module_head module_body module_access module_body '}' ';';
+	;
+
+	/* Module header: */
+module_head:
+	MODULE IDENTIFIER '{' {	printf("Module: %s\n", $2); };
+
+	/* Access keywords: */
+module_access:
+	PRIVATE ':' PUBLIC ':'
+	| PUBLIC ':' PRIVATE ':'
+	| PUBLIC ':'
+	| PRIVATE ':'
+	;
+
+	/* Body of the module: */
+module_body: | module_body decl_def;
+
+
+
+
+	/*************** Rest of the grammar of the language: ***************/
+decl_def:
+	/**** Declarations ****/
+	/* Declaration of Functions */
+	vartypes IDENTIFIER '(' ')' ';' { printf("Function: %s\n", $2); };
+	| vartypes IDENTIFIER '(' arglist ')' ';' { printf("Function: %s\n", $2); };
+	/* Declaration of Variables (which might include its own definition): */
+
+
+	/**** Definitions ****/
+	| /* Definition of Functions: */
+	vartypes IDENTIFIER '(' ')' '{' '}' { printf("Function: %s\n", $2); };
+	| vartypes IDENTIFIER '(' arglist ')' '{' '}' { printf("Function: %s\n", $2); };
+
+	/* Return types: */
+vartypes: TVOID | TINT | TCHAR | TFLOAT | TDOUBLE;
+
+	/* Argument list: */
+arglist: | arglist vartypes IDENTIFIER { printf("Var: %s\n", $3); } | arglist ',';
+
+
+
+
+
+
+
+
+
+
+
+
+	/*************** Testbench grammar: ***************/
+testbench:
+	testbench_head '}' ';'
+	| testbench_head testbench_body '}' ';'
+	;
+
+testbench_head:
+	TESTBENCH IDENTIFIER '{' { printf("Testbench found: %s\n", $2); };
+
+testbench_body:
+	':'
 %%

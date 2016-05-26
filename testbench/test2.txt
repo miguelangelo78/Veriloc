@@ -1,0 +1,19 @@
+module id {
+	private:
+		void func_test();
+		void another(int i, int j){}
+	public:
+		void myfunction(int x){}
+};
+
+testbench id2 {
+
+};
+
+module id4 {
+
+};
+
+testbench id3 {
+
+};
