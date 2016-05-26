@@ -39,9 +39,83 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     INT = 258,
-     FLOAT = 259,
-     STRING = 260
+     SEMICOLON = 258,
+     COLON = 259,
+     LPAREN = 260,
+     RPAREN = 261,
+     LBRACKET = 262,
+     RBRACKET = 263,
+     ACCENT = 264,
+     RSLASH = 265,
+     LSLASH = 266,
+     LSBRACKET = 267,
+     RSBRACKET = 268,
+     EQUAL = 269,
+     PLUS = 270,
+     MINUS = 271,
+     MULTIPLY = 272,
+     DIVIDE = 273,
+     LAND = 274,
+     LOR = 275,
+     LNOT = 276,
+     AND = 277,
+     OR = 278,
+     XOR = 279,
+     NOT = 280,
+     BIGGER = 281,
+     SMALLER = 282,
+     MACRO = 283,
+     TVOID = 284,
+     TINT = 285,
+     TCHAR = 286,
+     TFLOAT = 287,
+     TDOUBLE = 288,
+     TREG = 289,
+     TWIRE = 290,
+     TCONST = 291,
+     SIGNED = 292,
+     TUNSIGNED = 293,
+     TLONG = 294,
+     TSHORT = 295,
+     TYPEDEF = 296,
+     STATIC = 297,
+     ENUM = 298,
+     UNION = 299,
+     STRUCT = 300,
+     DEFINE = 301,
+     INCLUDE = 302,
+     PRAGMA = 303,
+     EXTERN = 304,
+     INLINE = 305,
+     RETURN = 306,
+     SIZEOF = 307,
+     IF = 308,
+     ELSE = 309,
+     ELSIF = 310,
+     SWITCH = 311,
+     CASE = 312,
+     DEFAULT = 313,
+     GOTO = 314,
+     WHILE = 315,
+     FOR = 316,
+     BREAK = 317,
+     CONTINUE = 318,
+     DO = 319,
+     PUBLIC = 320,
+     PRIVATE = 321,
+     MODULE = 322,
+     TESTBENCH = 323,
+     ASSIGN = 324,
+     ALWAYS = 325,
+     INPUT = 326,
+     OUTPUT = 327,
+     CONFIG = 328,
+     FORCE = 329,
+     POSEDGE = 330,
+     NEGEDGE = 331,
+     INT = 332,
+     FLOAT = 333,
+     STRING = 334
    };
 #endif
 
@@ -57,11 +131,12 @@ typedef union YYSTYPE
 	int ival;
 	float fval;
 	char * sval;
+	char cval;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 65 "parser.tab.h"
+#line 140 "parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

@@ -11,6 +11,7 @@ int main(int argc, char ** argv) {
 		/* Parse it:  */
 		yyin = file;
 		yyparse();
+		cout << "\n>> Parsing of \"" << argv[1] << "\" finished <<\n\nPress any key to exit";
 	} else {
 		cout << "Usage: veriloc [filename]\n";
 		return 1;

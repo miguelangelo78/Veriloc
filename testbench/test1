@@ -1,2 +1,69 @@
-Hello
-there
+#define PI 3.14
+
+void global_func() {
+	
+}
+
+int global_add(int n1, int n2) {
+	return n1 + n2;
+}
+
+module Mymodule {
+	public:
+		/* The ports of the module: */
+		reg  input a, b, c, d[7:0];
+		wire output q;
+
+		/* Constructor: */
+		Mymodule() {
+			myvar = 0;
+			assign q = a && b && c;
+		}
+
+		/* Constructor overloading: */
+		Mymodule(char operation) {
+			switch(operation) {
+			case '0':
+				assign q = a && b && c; break;
+			case '1':
+				assign q = a || b || c;
+			default:
+				assign q = 0;
+			}
+		}
+
+		int add(char c) {
+			q += c;
+			if(q >= 10)
+				q = 0;
+		}
+
+		/* Sensitivity list: */
+		always(a, b, c) {
+			add(c);
+		}
+
+	private:
+		char myvar;
+};
+
+testbench Test {
+private:
+	wire mywire;
+	reg myreg;
+	
+	Mymodule module;
+public:
+	Test() {
+
+	}
+
+	~Test() {
+
+	}
+
+	/* Sensivity list: */
+	always(module.a, module.b, module.c) {
+
+	}
+};
