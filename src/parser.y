@@ -23,8 +23,8 @@
 %token ALIGNOF IF ELSE ELSIF SWITCH CASE DEFAULT GOTO
 %token WHILE FOR BREAK CONTINUE DO
 %token PUBLIC PRIVATE PROTECTED
-%token MODULE TESTBENCH ASSIGN ALWAYS INPUT OUTPUT CONFIG FORCE POSEDGE NEGEDGE
-%token <sval> IDENTIFIER I_CONSTANT F_CONSTANT STRING_LITERAL
+%token MODULE TESTBENCH ASSIGN ALWAYS INPUT OUTPUT INOUT CONFIG FORCE POSEDGE
+%token NEGEDGE <sval> IDENTIFIER I_CONSTANT F_CONSTANT STRING_LITERAL
 %token <sval> TYPEDEF_NAME ENUMERATION_CONSTANT GENERIC STATIC_ASSERT
 %token <sval> MODULE_NAME <sval> TESTBENCH_NAME
 
@@ -107,7 +107,8 @@ parameter_declaration: declaration_specifiers declarator
 
 identifier_list: IDENTIFIER
 	| identifier_list ',' IDENTIFIER
-	| identifier_list '.' IDENTIFIER;
+	| identifier_list '.' IDENTIFIER
+	| identifier_list ',' type_qualifier IDENTIFIER;
 
 type_name: specifier_qualifier_list abstract_declarator
 	| specifier_qualifier_list;
@@ -206,7 +207,7 @@ enumerator_list: enumerator | enumerator_list ',' enumerator;
 
 enumerator: enumeration_constant '=' constant_expression | enumeration_constant;
 
-type_qualifier: CONST | OUTPUT | INPUT;
+type_qualifier: CONST | OUTPUT | INPUT | INOUT | POSEDGE | NEGEDGE;
 
 function_specifier: INLINE;
 
@@ -337,6 +338,8 @@ expression_statement: ';' | expression ';';
 
 selection_statement:
 	IF '(' expression ')' statement ELSE statement
+	| IF '(' expression ')' statement ELSIF '(' expression ')' statement
+	| IF '(' expression ')' statement ELSIF '(' expression ')' statement ELSE statement
 	| IF '(' expression')' statement
 	| SWITCH '(' expression ')' statement;
 
@@ -357,6 +360,7 @@ jump_statement:
 
 always_statement:
 	ALWAYS '(' identifier_list ')' statement
+	| ALWAYS '(' ')' statement;
 
 translation_unit:
 	external_declaration
@@ -371,7 +375,7 @@ external_declaration:
 function_definition:
 	declaration_specifiers declarator declaration_list compound_statement
 	| declaration_specifiers declarator compound_statement
-	| declarator compound_statement;
+	| direct_declarator compound_statement;
 
 declaration_list: declaration | declaration_list declaration;
 %%

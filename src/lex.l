@@ -137,10 +137,10 @@ private			return PRIVATE;
 
 module			return MODULE;
 testbench			return TESTBENCH;
-assign			return ASSIGN;
 always			return ALWAYS;
 input			return INPUT;
 output			return OUTPUT;
+inout			return INOUT;
 config			return CONFIG;
 force			return FORCE;
 posedge			return POSEDGE;

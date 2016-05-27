@@ -111,20 +111,21 @@
      ALWAYS = 327,
      INPUT = 328,
      OUTPUT = 329,
-     CONFIG = 330,
-     FORCE = 331,
-     POSEDGE = 332,
-     NEGEDGE = 333,
-     IDENTIFIER = 334,
-     I_CONSTANT = 335,
-     F_CONSTANT = 336,
-     STRING_LITERAL = 337,
-     TYPEDEF_NAME = 338,
-     ENUMERATION_CONSTANT = 339,
-     GENERIC = 340,
-     STATIC_ASSERT = 341,
-     MODULE_NAME = 342,
-     TESTBENCH_NAME = 343
+     INOUT = 330,
+     CONFIG = 331,
+     FORCE = 332,
+     POSEDGE = 333,
+     NEGEDGE = 334,
+     IDENTIFIER = 335,
+     I_CONSTANT = 336,
+     F_CONSTANT = 337,
+     STRING_LITERAL = 338,
+     TYPEDEF_NAME = 339,
+     ENUMERATION_CONSTANT = 340,
+     GENERIC = 341,
+     STATIC_ASSERT = 342,
+     MODULE_NAME = 343,
+     TESTBENCH_NAME = 344
    };
 #endif
 
@@ -146,7 +147,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 150 "parser.tab.h"
+#line 151 "parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
