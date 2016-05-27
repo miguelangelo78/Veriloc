@@ -11,7 +11,10 @@ testbench id2 {
 };
 
 module id4 {
+public:
+	void yes() {
 
+	}
 };
 
 testbench id3 {
