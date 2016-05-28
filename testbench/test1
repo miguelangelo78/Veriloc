@@ -3,7 +3,8 @@ module Mymodule {
 		// The ports of the module: */
 		reg  input a, b, c, d[7:0;8:0];
 		wire output q;
-		reg input data[7:0] = 8h1x0zZ020FA; // Test literals */
+		reg input data[7:0] = -8hu1x0zZ020FA; // Test literals */
+		char a = -1;
 
 		// Constructor: */
 		Mymodule() {
