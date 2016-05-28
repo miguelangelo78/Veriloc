@@ -16,6 +16,7 @@ NZ  [1-9]
 L   [a-zA-Z_]
 A   [a-zA-Z_0-9]
 H   [a-fA-F0-9]
+HV  [a-fA-F0-9xXzZ]
 HP  (0[xX])
 E   ([Ee][+-]?{D}+)
 P   ([Pp][+-]?{D}+)
@@ -151,6 +152,7 @@ negedge			return NEGEDGE;
 {NZ}{D}*{IS}?					{ return I_CONSTANT; }
 "0"{O}*{IS}?					{ return I_CONSTANT; }
 {CP}?"'"([^'\\\n]|{ES})+"'"		{ return I_CONSTANT; }
+{D}+(b|d|o|h){HV}+				{ printf("%s", yytext); return I_CONSTANT; }
 
 {D}+{E}{FS}?					{ return F_CONSTANT; }
 {D}*"."{D}+{E}?{FS}?			{ return F_CONSTANT; }

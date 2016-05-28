@@ -1,8 +1,9 @@
 module Mymodule {
 	public:
 		// The ports of the module: */
-		reg  input a, b, c, d[7:0];
+		reg  input a, b, c, d[7:0;8:0];
 		wire output q;
+		reg input data[7:0] = 8h1x0zZ020FA; // Test literals */
 
 		// Constructor: */
 		Mymodule() {
@@ -59,3 +60,8 @@ testbench Test {
 			run_again();
 	}
 };
+
+int main(int argc, char ** argv) {
+	printf("Example code");
+	return 0;
+}

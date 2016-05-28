@@ -30,7 +30,7 @@
 
 %start source
 %%
-source: | source module;
+source: | source module | source translation_unit;
 
 	/************** Module grammar: **************/
 module:
@@ -43,9 +43,6 @@ module_head:
 
 	/* Body of the module: */
 module_body: | module_body translation_unit;
-
-
-
 
 	/*************** Rest of the grammar of the language: ***************/
 	/* Access keywords: */
@@ -78,6 +75,9 @@ direct_declarator: IDENTIFIER | MODULE_NAME | TESTBENCH_NAME
 	| '(' declarator ')'
 	| direct_declarator '[' ']'
 	| direct_declarator '[' constant_expression ':' constant_expression ']'
+	| direct_declarator '['
+		constant_expression ':' constant_expression ';'
+		constant_expression ':' constant_expression ']'
 	| direct_declarator '[' '*' ']'
 	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']'
 	| direct_declarator '[' STATIC assignment_expression ']'
@@ -121,6 +121,8 @@ direct_abstract_declarator:
 	'(' abstract_declarator ')'
 	| '[' ']'
 	| '[' constant_expression ':' constant_expression ']'
+	| '[' constant_expression ':' constant_expression ';'
+		constant_expression ':' constant_expression ']'
 	| '[' '*' ']'
 	| '[' STATIC type_qualifier_list assignment_expression ']'
 	| '[' STATIC assignment_expression ']'
@@ -156,8 +158,11 @@ designation: designator_list '=';
 
 designator_list: designator | designator_list designator;
 
-designator: '[' constant_expression ']' | '.' IDENTIFIER
-	| '[' constant_expression ':' constant_expression ']';
+designator: '[' constant_expression ']'
+	| '.' IDENTIFIER
+	| '[' constant_expression ':' constant_expression ']'
+	| '[' constant_expression ':' constant_expression ';'
+		constant_expression ':' constant_expression ']';
 
 static_assert_declaration: STATIC_ASSERT '(' constant_expression ',' STRING_LITERAL ')' ';';
 
@@ -232,6 +237,9 @@ generic_association: type_name ':' assignment_expression
 postfix_expression: primary_expression
 	| postfix_expression '[' expression ']'
 	| postfix_expression '[' constant_expression ':' constant_expression ']'
+	| postfix_expression '['
+		constant_expression ':' constant_expression ';'
+		constant_expression ':' constant_expression ']'
 	| postfix_expression '(' ')'
 	| postfix_expression '(' argument_expression_list ')'
 	| postfix_expression '.' IDENTIFIER
