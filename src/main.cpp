@@ -1,10 +1,12 @@
 #include <headers.h>
 #include <map>
+#include <ast_to_verilog.h>
 
 map<string, int> sym_table;
 
 void sym_add(char * key, int token_id) {
-	sym_table.insert(pair<string, int>(key, token_id));
+	if(sym_table.find(key) == sym_table.end())
+		sym_table.insert(pair<string, int>(key, token_id));
 }
 
 int sym_check_type(void) {
@@ -50,10 +52,19 @@ int main(int argc, char ** argv) {
 			cout << "Could not open '" << argv[1] << "'\n";
 			return -1;
 		}
+		ast_init();
 		/* Parse it:  */
 		yyin = file;
 		yyparse();
-		cout << "\n>> Parsing of \"" << argv[1] << "\" finished <<\n\nPress any key to exit";
+		printf("\n>> Parsing of %s finished\n>> Converting AST (Abstract Syntax Tree) to Verilog\n\n",
+			argv[1]);
+
+		/* Convert tree into Verilog source code: */
+		ast_convert();
+		ast_dump();
+
+		fclose(yyin);
+		printf("Done.\n\nPress enter to exit");
 	} else {
 		cout << "Usage: veriloc [filename]\n";
 		return 1;

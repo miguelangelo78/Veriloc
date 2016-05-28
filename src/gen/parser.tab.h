@@ -125,7 +125,8 @@
      GENERIC = 341,
      STATIC_ASSERT = 342,
      MODULE_NAME = 343,
-     TESTBENCH_NAME = 344
+     TESTBENCH_NAME = 344,
+     GLOBAL_SRC = 345
    };
 #endif
 
@@ -138,16 +139,17 @@ typedef union YYSTYPE
 /* Line 1676 of yacc.c  */
 #line 6 "src/parser.y"
 
+	char cval;
+	char * sval;
 	int ival;
 	float fval;
 	double dval;
-	char * sval;
-	char cval;
+	root * rootval;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 151 "parser.tab.h"
+#line 153 "parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

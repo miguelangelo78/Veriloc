@@ -10,7 +10,10 @@ def run_test(filename):
 		print "ERROR: Can not launch the requested test. Exiting..."
 		sys.exit(0)
 	os.system("cd " + pwd + " && cd .. && make -f toolchain/makefile.mak "+filename)
-	raw_input()
+	try:
+		raw_input()	
+	except: 
+		pass
 
 def display_scripts(script_list):
 	for i in range(len(script_list)):

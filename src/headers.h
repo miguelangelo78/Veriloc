@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <ast.h>
 #include "parser.tab.h"
 
 using namespace std;

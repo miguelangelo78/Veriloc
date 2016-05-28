@@ -4,11 +4,12 @@
 %}
 
 %union {
+	char cval;
+	char * sval;
 	int ival;
 	float fval;
 	double dval;
-	char * sval;
-	char cval;
+	root * rootval;
 }
 
 	/* Token Operators: */
@@ -26,27 +27,53 @@
 %token MODULE TESTBENCH ASSIGN ALWAYS INPUT OUTPUT INOUT CONFIG FORCE POSEDGE
 %token NEGEDGE <sval> IDENTIFIER I_CONSTANT F_CONSTANT STRING_LITERAL
 %token <sval> TYPEDEF_NAME ENUMERATION_CONSTANT GENERIC STATIC_ASSERT
-%token <sval> MODULE_NAME <sval> TESTBENCH_NAME
+%token <sval> MODULE_NAME <sval> TESTBENCH_NAME <sval> GLOBAL_SRC
+
+	/* Production types: */
+%type <rootval> root
+%type <rootval> source
 
 %start source
 %%
-source: | source module | source translation_unit;
+source: | source root | source translation_unit { $$ = new root((char*)"__global__", GLOBAL_SRC); };
 
-	/************** Module grammar: **************/
-module:
-	module_head module_body '}' ';';
+	/************** Root grammar: **************/
+root:
+	MODULE IDENTIFIER '{' root_body '}' ';' { $$ = new root($2, MODULE_NAME); }
+	| TESTBENCH IDENTIFIER '{'  root_body '}' ';' { $$ = new root($2, TESTBENCH_NAME); };
 
-	/* Module header: */
-module_head:
-	MODULE IDENTIFIER '{' { sym_add($2, MODULE_NAME); }
-	| TESTBENCH IDENTIFIER '{' { sym_add($2, TESTBENCH_NAME); };
-
-	/* Body of the module: */
-module_body: | module_body translation_unit;
+	/* Body of the root structure: */
+root_body: | root_body translation_unit_context;
 
 	/*************** Rest of the grammar of the language: ***************/
+	/* Shell of the language: */
+translation_unit: 
+	external_declaration 
+	| translation_unit external_declaration
+	
+translation_unit_context:
+	external_declaration_internal 
+	| translation_unit_context external_declaration_internal;
+
+external_declaration: /* External to the modules/testbenches */
+	function_definition
+	| declaration;
+
+external_declaration_internal: /* Internal to the modules/testbenches */
+	function_definition
+	| declaration
+	| always_statement
+	| struct_access;
+	
+function_definition:
+	declaration_specifiers declarator declaration_list compound_statement
+	| declaration_specifiers declarator compound_statement
+	| direct_declarator compound_statement;
+
+declaration_list: declaration | declaration_list declaration;
+
 	/* Access keywords: */
-module_access: PUBLIC ':' | PRIVATE ':';
+struct_access: PUBLIC ':' | PRIVATE ':';
 
 declaration: declaration_specifiers ';'
 	| declaration_specifiers init_declarator_list ';'
@@ -369,21 +396,4 @@ jump_statement:
 always_statement:
 	ALWAYS '(' identifier_list ')' statement
 	| ALWAYS '(' ')' statement;
-
-translation_unit:
-	external_declaration
-	| translation_unit external_declaration;
-
-external_declaration:
-	function_definition
-	| declaration
-	| always_statement
-	| module_access;
-
-function_definition:
-	declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement
-	| direct_declarator compound_statement;
-
-declaration_list: declaration | declaration_list declaration;
 %%

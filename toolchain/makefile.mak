@@ -22,7 +22,7 @@ LEXER = lex
 PARSER = parser
 
 ####### Objects/Outputs:
-OBJS = $(GEN)/$(PARSER).tab.c $(GEN)/$(LEXER).yy.c $(OBJ)/main.o
+OBJS = $(GEN)/$(PARSER).tab.c $(GEN)/$(LEXER).yy.c $(OBJ)/main.o $(OBJ)/ast.o $(OBJ)/ast_to_verilog.o
 
 ####### Lexer:
 $(GEN)/$(LEXER).yy.c: $(SRC)/$(LEXER).l
@@ -39,9 +39,15 @@ $(GEN)/$(PARSER).tab.c: $(SRC)/$(PARSER).y
 $(OBJ)/main.o: $(SRC)/main.cpp
 	$(CXX) -o $@ -c $^ $(CPPFLAGS)
 
+$(OBJ)/ast.o: $(SRC)/ast.cpp
+	$(CXX) -o $@ -c $^ $(CPPFLAGS)
+
+$(OBJ)/ast_to_verilog.o: $(SRC)/ast_to_verilog.cpp
+	$(CXX) -o $@ -c $^ $(CPPFLAGS)
+
 all: $(OBJS)
 	$(CXX) -o $(BIN)/$(EXEC) $^ $(CPPFLAGS)
-	@printf "Finished!"
+	@printf "Finished!\n"
 
 clean:
 	$(RM) $(GEN)/*.*
