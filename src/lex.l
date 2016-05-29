@@ -29,7 +29,7 @@ WS  [ \t\v\n\f]
 
 %%
 	/* Comments: */
-"/*"				{ comment(); }
+"/*"			{ comment(); }
 "//".*			{ /* consume //-comment */ }
 
 	/* Single characters: */
@@ -41,7 +41,7 @@ WS  [ \t\v\n\f]
 "}"				return '}';
 "'"				return '\'';
 "/"				return '/';
-"\\"				return '\\';
+"\\"			return '\\';
 "["				return '[';
 "]"				return ']';
 "_"				return '_';

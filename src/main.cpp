@@ -24,9 +24,8 @@ void yyerror(const char * str) {
 	exit(-1);
 }
 
-int yywrap(void)        /* called at end of input */
-{
-    return 1;           /* terminate now */
+int yywrap(void) { /* called at end of input/lex */
+	return 1; /* terminate now */
 }
 
 void comment(void) {
@@ -55,6 +54,7 @@ int main(int argc, char ** argv) {
 		ast_init();
 		/* Parse it:  */
 		yyin = file;
+		printf(">> Parsing %s...\n\n", argv[1]);
 		yyparse();
 		printf("\n>> Parsing of %s finished\n>> Converting AST (Abstract Syntax Tree) to Verilog\n\n",
 			argv[1]);

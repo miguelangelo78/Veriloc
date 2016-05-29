@@ -20,3 +20,8 @@ public:
 testbench id3 {
 
 };
+
+struct mystruct {
+	char struct_var;
+	float another_var;
+};

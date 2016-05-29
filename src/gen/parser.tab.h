@@ -102,31 +102,30 @@
      BREAK = 318,
      CONTINUE = 319,
      DO = 320,
-     PUBLIC = 321,
-     PRIVATE = 322,
-     PROTECTED = 323,
-     MODULE = 324,
-     TESTBENCH = 325,
-     ASSIGN = 326,
-     ALWAYS = 327,
-     INPUT = 328,
-     OUTPUT = 329,
-     INOUT = 330,
-     CONFIG = 331,
-     FORCE = 332,
-     POSEDGE = 333,
-     NEGEDGE = 334,
-     IDENTIFIER = 335,
-     I_CONSTANT = 336,
-     F_CONSTANT = 337,
-     STRING_LITERAL = 338,
-     TYPEDEF_NAME = 339,
-     ENUMERATION_CONSTANT = 340,
-     GENERIC = 341,
-     STATIC_ASSERT = 342,
-     MODULE_NAME = 343,
-     TESTBENCH_NAME = 344,
-     GLOBAL_SRC = 345
+     MODULE = 321,
+     TESTBENCH = 322,
+     ASSIGN = 323,
+     ALWAYS = 324,
+     PUBLIC = 325,
+     PRIVATE = 326,
+     INPUT = 327,
+     OUTPUT = 328,
+     INOUT = 329,
+     CONFIG = 330,
+     FORCE = 331,
+     POSEDGE = 332,
+     NEGEDGE = 333,
+     IDENTIFIER = 334,
+     I_CONSTANT = 335,
+     F_CONSTANT = 336,
+     STRING_LITERAL = 337,
+     TYPEDEF_NAME = 338,
+     ENUMERATION_CONSTANT = 339,
+     GENERIC = 340,
+     STATIC_ASSERT = 341,
+     MODULE_NAME = 342,
+     TESTBENCH_NAME = 343,
+     GLOBAL_SRC = 344
    };
 #endif
 
@@ -137,19 +136,101 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 6 "src/parser.y"
+#line 7 "src/parser.y"
 
 	char cval;
 	char * sval;
 	int ival;
+	unsigned int uival;
 	float fval;
 	double dval;
+
+
+/* Line 1676 of yacc.c  */
+#line 17 "src/parser.y"
+
 	root * rootval;
+	translation_unit * translation_unit_v;
+	translation_unit_context * translation_unit_context_v;
+	external_declaration * external_declaration_v;
+	external_declaration_internal * external_declaration_internal_v;
+	function_definition * function_definition_v;
+	declaration_list * declaration_list_v;
+	declaration * declaration_v;
+	declaration_specifiers * declaration_specifiers_v;
+	direct_abstract_declarator * direct_abstract_declarator_v;
+	abstract_declarator * abstract_declarator_v;
+	direct_declarator * direct_declarator_v;
+	declarator * declarator_v;
+	designation * designation_v;
+	designator_list * designator_list_v;
+	designator * designator_v;
+	static_assert_declaration * static_assert_declaration_v;
+	initializer * initializer_v;
+	init_declarator * init_declarator_v;
+	initializer_list * initializer_list_v;
+	init_declarator_list * init_declarator_list_v;
+	pointer * pointer_v;
+	type_specifier * type_specifier_v;
+	storage_class_specifier * storage_class_specifier_v;
+	struct_or_union_specifier * struct_or_union_specifier_v;
+	struct_or_union * struct_or_union_v;
+	struct_declaration_list * struct_declaration_list_v;
+	struct_declaration * struct_declaration_v;
+	specifier_qualifier_list * specifier_qualifier_list_v;
+	enum_specifier * enum_specifier_v;
+	parameter_type_list * parameter_type_list_v;
+	parameter_list * parameter_list_v;
+	parameter_declaration * parameter_declaration_v;
+	identifier_list * identifier_list_v;
+	type_name * type_name_v;
+	type_qualifier_list * type_qualifier_list_v;
+	type_qualifier * type_qualifier_v;
+	function_specifier * function_specifier_v;
+	alignment_specifier * alignment_specifier_v;
+	struct_access * struct_access_v;
+	primary_expression * primary_expression_v;
+	constant * constant_v;
+	enumeration_constant * enumeration_constant_v;
+	prod_string * prod_string_v;
+	generic_selection * generic_selection_v;
+	generic_assoc_list * generic_assoc_list_v;
+	generic_association * generic_association_v;
+	postfix_expression * postfix_expression_v;
+	argument_expression_list * argument_expression_list_v;
+	unary_expression * unary_expression_v;
+	unary_operator * unary_operator_v;
+	cast_expression * cast_expression_v;
+	multiplicative_expression * multiplicative_expression_v;
+	additive_expression * additive_expression_v;
+	shift_expression * shift_expression_v;
+	relational_expression * relational_expression_v;
+	equality_expression * equality_expression_v;
+	and_expression * and_expression_v;
+	exclusive_or_expression * exclusive_or_expression_v;
+	inclusive_or_expression * inclusive_or_expression_v;
+	logical_and_expression * logical_and_expression_v;
+	logical_or_expression * logical_or_expression_v;
+	conditional_expression * conditional_expression_v;
+	assignment_expression * assignment_expression_v;
+	assignment_operator * assignment_operator_v;
+	expression * expression_v;
+	constant_expression * constant_expression_v;
+	statement * statement_v;
+	labeled_statement * labeled_statement_v;
+	compound_statement * compound_statement_v;
+	block_item_list * block_item_list_v;
+	block_item * block_item_v;
+	expression_statement * expression_statement_v;
+	selection_statement * selection_statement_v;
+	iteration_statement * iteration_statement_v;
+	jump_statement * jump_statement_v;
+	always_statement * always_statement_v;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 153 "parser.tab.h"
+#line 234 "parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
