@@ -927,63 +927,218 @@ public:
 };
 
 class multiplicative_expression {
+public:
+	std::vector<cast_expression *> expr;
+	std::vector<unsigned int> op;
 
+	void add(cast_expression * expr, unsigned int op) {
+		if(expr) this->expr.push_back(expr);
+		if(op) this->op.push_back(op);
+	}
+	multiplicative_expression(cast_expression * expr, unsigned int op) {
+		add(expr, op);
+	}
 };
 
 class additive_expression {
+public:
+	std::vector<multiplicative_expression *> expr;
+	std::vector<unsigned int> op;
 
+	void add(multiplicative_expression * expr, unsigned int op) {
+		if(expr) this->expr.push_back(expr);
+		if(op) this->op.push_back(op);
+	}
+	additive_expression(multiplicative_expression * expr, unsigned int op) {
+		add(expr, op);
+	}
 };
 
 class shift_expression {
+public:
+	std::vector<additive_expression *> expr;
+	std::vector<unsigned int> op;
 
+	void add(additive_expression * expr, unsigned int op) {
+		if(expr) this->expr.push_back(expr);
+		if(op) this->op.push_back(op);
+	}
+	shift_expression(additive_expression * expr, unsigned int op) {
+		add(expr, op);
+	}
 };
 
 class relational_expression {
+public:
+	std::vector<shift_expression *> expr;
+	std::vector<unsigned int> op;
 
+	void add(shift_expression * expr, unsigned int op) {
+		if(expr) this->expr.push_back(expr);
+		if(op) this->op.push_back(op);
+	}
+	relational_expression(shift_expression * expr, unsigned int op) {
+		add(expr, op);
+	}
 };
 
 class equality_expression {
+public:
+	std::vector<relational_expression *> expr;
+	std::vector<unsigned int> op;
 
+	void add(relational_expression * expr, unsigned int op) {
+		if(expr) this->expr.push_back(expr);
+		if(op) this->op.push_back(op);
+	}
+	equality_expression(relational_expression * expr, unsigned int op) {
+		add(expr, op);
+	}
 };
 
 class and_expression {
+public:
+	std::vector<equality_expression *> expr;
+	std::vector<unsigned int> op;
 
+	void add(equality_expression * expr, unsigned int op) {
+		if(expr) this->expr.push_back(expr);
+		if(op) this->op.push_back(op);
+	}
+	and_expression(equality_expression * expr, unsigned int op) {
+		add(expr, op);
+	}
 };
 
 class exclusive_or_expression {
+public:
+	std::vector<and_expression *> expr;
+	std::vector<unsigned int> op;
 
+	void add(and_expression * expr, unsigned int op) {
+		if(expr) this->expr.push_back(expr);
+		if(op) this->op.push_back(op);
+	}
+	exclusive_or_expression(and_expression * expr, unsigned int op) {
+		add(expr, op);
+	}
 };
 
 class inclusive_or_expression {
+public:
+	std::vector<exclusive_or_expression *> expr;
+	std::vector<unsigned int> op;
 
+	void add(exclusive_or_expression * expr, unsigned int op) {
+		if(expr) this->expr.push_back(expr);
+		if(op) this->op.push_back(op);
+	}
+	inclusive_or_expression(exclusive_or_expression * expr, unsigned int op) {
+		add(expr, op);
+	}
 };
 
 class logical_and_expression {
+public:
+	std::vector<inclusive_or_expression *> expr;
+	std::vector<unsigned int> op;
 
+	void add(inclusive_or_expression * expr, unsigned int op) {
+		if(expr) this->expr.push_back(expr);
+		if(op) this->op.push_back(op);
+	}
+	logical_and_expression(inclusive_or_expression * expr, unsigned int op) {
+		add(expr, op);
+	}
 };
 
 class logical_or_expression {
+public:
+	std::vector<logical_and_expression *> expr;
+	std::vector<unsigned int> op;
 
+	void add(logical_and_expression * expr, unsigned int op) {
+		if(expr) this->expr.push_back(expr);
+		if(op) this->op.push_back(op);
+	}
+	logical_or_expression(logical_and_expression * expr, unsigned int op) {
+		add(expr, op);
+	}
 };
 
 class conditional_expression {
+public:
+	std::vector<logical_or_expression *> logical_expr;
+	std::vector<expression*> expr;
 
+	_ALLOCV_;
+
+	char add(logical_or_expression * logical_expr, expression * expr) {
+		_ALLOCPI_;
+		if(logical_expr) this->logical_expr.push_back(logical_expr);
+		if(expr) this->expr.push_back(expr);
+		_ALLOCPE_;
+	}
+	conditional_expression(logical_or_expression * logical_expr, expression * expr) {
+		_ALLOCA_;
+		add(logical_expr, expr);
+	}
 };
 
 class assignment_expression {
+public:
+	conditional_expression * cond_expr;
+	std::vector<unary_expression *> un_expr;
+	std::vector<assignment_operator *> assign_op;
+	_ALLOCV_;
 
+	char add(
+		conditional_expression * cond_expr,
+		unary_expression * un_expr,
+		assignment_operator * assign_op
+	)
+	{
+		_ALLOCPI_;
+		if(cond_expr) this->cond_expr = cond_expr;
+		if(un_expr) this->un_expr.push_back(un_expr);
+		if(assign_op) this->assign_op.push_back(assign_op);
+		_ALLOCPE_;
+	}
+
+	assignment_expression(
+		conditional_expression * cond_expr,
+		unary_expression * un_expr,
+		assignment_operator * assign_op
+	)
+	{
+		_ALLOCA_;
+		add(cond_expr, un_expr, assign_op);
+	}
 };
 
 class assignment_operator {
-
+public:
+	unsigned int op;
+	assignment_operator(unsigned int op) : op(op) {}
 };
 
 class expression {
+public:
+	std::vector<assignment_expression *> assign_expr;
+	void add(assignment_expression * assign_expr) {
+		if(assign_expr) this->assign_expr.push_back(assign_expr);
+	}
 
+	expression(assignment_expression * assign_expr) {
+		add(assign_expr);
+	}
 };
 
 class constant_expression {
-
+public:
+	conditional_expression * cond_expr;
+	constant_expression(conditional_expression * cond_expr)
+	: cond_expr(cond_expr) {}
 };
 
 /* Constants: */
@@ -1020,43 +1175,127 @@ class generic_association {};
 
 /* Statements: */
 class statement {
+public:
+	labeled_statement * label_stat;
+	compound_statement * comp_stat;
+	expression_statement * expr_stat;
+	selection_statement * sel_stat;
+	iteration_statement * iter_stat;
+	jump_statement * jmp_stat;
+	always_statement * always_stat;
 
+	statement(
+		labeled_statement * label_stat,
+		compound_statement * comp_stat,
+		expression_statement * expr_stat,
+		selection_statement * sel_stat,
+		iteration_statement * iter_stat,
+		jump_statement * jmp_stat,
+		always_statement * always_stat
+	)
+	: label_stat(label_stat), comp_stat(comp_stat),
+	  expr_stat(expr_stat),sel_stat(sel_stat),
+	  iter_stat(iter_stat), jmp_stat(jmp_stat),
+	  always_stat(always_stat) { }
 };
 
 class labeled_statement {
-
+public:
+	char * id;
+	statement * stat;
+	constant_expression * const_expr;
+	labeled_statement(char * id, statement * stat, constant_expression * const_expr)
+	: id(id), stat(stat), const_expr(const_expr) {}
 };
 
 class compound_statement {
-
+public:
+	block_item_list * b_item_list;
+	compound_statement(block_item_list * b_item_list)
+	: b_item_list(b_item_list) {}
 };
 
 class block_item_list {
+public:
+	std::vector<block_item *> b_item;
+	void add(block_item * b_item) {
+		if(b_item) this->b_item.push_back(b_item);
+	}
 
+	block_item_list(block_item * b_item) {
+		add(b_item);
+	}
 };
 
 class block_item {
+public:
+	declaration * decl;
+	statement * stat;
 
+	block_item(declaration * decl, statement * stat)
+	: decl(decl), stat(stat) {}
 };
 
 class expression_statement {
-
+public:
+	expression * expr;
+	expression_statement(expression * expr)
+	: expr(expr) { }
 };
 
 class selection_statement {
-
+public:
+	char is_switch;
+	expression * expr1, * expr2;
+	statement * stat1, * stat2, * stat3;
+	selection_statement(
+		char is_switch,
+		expression * expr1,
+		expression * expr2,
+		statement * stat1,
+		statement * stat2,
+		statement * stat3
+	)
+	: is_switch(is_switch), expr1(expr1), expr2(expr2),
+	  stat1(stat1), stat2(stat2), stat3(stat3) {}
 };
 
 class iteration_statement {
+public:
+	char loop_type;
+	expression * expr;
+	statement * stat;
+	expression_statement * expr_stat1, * expr_stat2;
+	declaration * decl;
 
+	iteration_statement(
+		char loop_type,
+		expression * expr,
+		statement * stat,
+		expression_statement * expr_stat1,
+		expression_statement * expr_stat2,
+		declaration * decl
+	)
+	: loop_type(loop_type), expr(expr), stat(stat),
+	  expr_stat1(expr_stat1), expr_stat2(expr_stat2),
+	  decl(decl) { }
 };
 
 class jump_statement {
-
+public:
+	char * keyword;
+	char * id;
+	expression * expr;
+	jump_statement(char * keyword, char * id, expression * expr)
+	: keyword(keyword), id(id), expr(expr) {}
 };
 
 class always_statement {
-
+public:
+	identifier_list * id_list;
+	statement * stat;
+	always_statement(identifier_list * id_list, statement * stat)
+	: id_list(id_list), stat(stat) { }
 };
 
 #endif

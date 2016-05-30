@@ -1284,7 +1284,7 @@ return INLINE;
 case 78:
 YY_RULE_SETUP
 #line 117 "src/lex.l"
-return RETURN;
+{ yylval.sval = strdup(yytext); return RETURN; }
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
@@ -1329,7 +1329,7 @@ return DEFAULT;
 case 87:
 YY_RULE_SETUP
 #line 128 "src/lex.l"
-return GOTO;
+{ yylval.sval = strdup(yytext); return GOTO; }
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
@@ -1344,12 +1344,12 @@ return FOR;
 case 90:
 YY_RULE_SETUP
 #line 132 "src/lex.l"
-return BREAK;
+{ yylval.sval = strdup(yytext); return BREAK; }
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
 #line 133 "src/lex.l"
-return CONTINUE;
+{ yylval.sval = strdup(yytext); return CONTINUE; }
 	YY_BREAK
 case 92:
 YY_RULE_SETUP

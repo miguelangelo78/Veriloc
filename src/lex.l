@@ -114,7 +114,7 @@ include			return INCLUDE;
 pragma			return PRAGMA;
 extern			return EXTERN;
 inline			return INLINE;
-return			return RETURN;
+return			{ yylval.sval = strdup(yytext); return RETURN; }
 
 sizeof			return SIZEOF;
 alignas			return ALIGNAS;
@@ -125,12 +125,12 @@ elsif			return ELSIF;
 switch			return SWITCH;
 case			return CASE;
 default			return DEFAULT;
-goto			return GOTO;
+goto			{ yylval.sval = strdup(yytext); return GOTO; }
 
 while			return WHILE;
 for				return FOR;
-break			return BREAK;
-continue		return CONTINUE;
+break			{ yylval.sval = strdup(yytext); return BREAK; }
+continue		{ yylval.sval = strdup(yytext); return CONTINUE; }
 do				return DO;
 
 public			{ yylval.uival = PUBLIC; return PUBLIC; }
