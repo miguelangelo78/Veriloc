@@ -43,8 +43,12 @@
 	struct_or_union * struct_or_union_v;
 	struct_declaration_list * struct_declaration_list_v;
 	struct_declaration * struct_declaration_v;
+	struct_declarator_list * struct_declarator_list_v;
+	struct_declarator * struct_declarator_v;
 	specifier_qualifier_list * specifier_qualifier_list_v;
 	enum_specifier * enum_specifier_v;
+	enumerator_list * enumerator_list_v;
+	enumerator * enumerator_v;
 	parameter_type_list * parameter_type_list_v;
 	parameter_list * parameter_list_v;
 	parameter_declaration * parameter_declaration_v;
@@ -123,9 +127,13 @@
 %type <struct_or_union_specifier_v> struct_or_union_specifier
 %type <struct_or_union_v> struct_or_union
 %type <struct_declaration_list_v> struct_declaration_list
+%type <struct_declarator_list_v> struct_declarator_list
 %type <struct_declaration_v> struct_declaration
+%type <struct_declarator_v> struct_declarator
 %type <specifier_qualifier_list_v> specifier_qualifier_list
 %type <enum_specifier_v> enum_specifier
+%type <enumerator_list_v> enumerator_list
+%type <enumerator_v> enumerator
 %type <parameter_type_list_v> parameter_type_list
 %type <parameter_list_v> parameter_list
 %type <parameter_declaration_v> parameter_declaration
@@ -177,7 +185,7 @@
 	/* Token Operators: */
 %token EQ_OP NEQ_OP ELLIPSIS RIGHT_ASSIGN LEFT_ASSIGN ADD_ASSIGN SUB_ASSIGN
 %token MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN
-%token RIGHT_OP LEFT_OP INC_OP DEC_OP PTR_OP AND_OP OR_OP GE_OP LE_OP
+%token <uival> RIGHT_OP LEFT_OP INC_OP DEC_OP PTR_OP AND_OP OR_OP GE_OP LE_OP
 
 	/* Token Keywords: */
 %token <uival> VOID INT CHAR BOOL FLOAT DOUBLE AUTO REG WIRE 
@@ -187,14 +195,15 @@
 %token WHILE FOR BREAK CONTINUE DO MODULE TESTBENCH ASSIGN ALWAYS
 %token <uival> PUBLIC PRIVATE
 %token <uival> INPUT OUTPUT INOUT CONFIG FORCE POSEDGE NEGEDGE <sval> IDENTIFIER 
-%token I_CONSTANT F_CONSTANT STRING_LITERAL
-%token <sval> TYPEDEF_NAME ENUMERATION_CONSTANT GENERIC STATIC_ASSERT
+%token <ival> I_CONSTANT <fval> F_CONSTANT <sval> STRING_LITERAL
+%token <sval> TYPEDEF_NAME <sval> ENUMERATION_CONSTANT GENERIC STATIC_ASSERT
 %token <sval> MODULE_NAME <sval> TESTBENCH_NAME <sval> GLOBAL_SRC
 
 %start source
 %%
-source: 
-	| source root 
+source:
+	{ $$ = new root(0,0,0,0); }
+	| source root { $$ = new root(0,0,0,0); }
 	| source translation_unit { $$ = new root((char*)"__global__", GLOBAL_SRC, 0, $2); }
 
 	/************** Root grammar: **************/
@@ -210,6 +219,7 @@ translation_unit:
 
 	/* Shell of the language: */
 translation_unit_context:
+	{ $$ = new translation_unit_context(0); }
 	| external_declaration_internal { $$ = new translation_unit_context($1); }
 	| translation_unit_context external_declaration_internal { $$->add($2); };
 
@@ -271,40 +281,43 @@ declaration_specifiers:
 			if(!$$->add(0,0,0,0,$1)) $$ = new declaration_specifiers(0,0,0,0,$1); 		
 	};
 
-init_declarator_list: init_declarator
-	| init_declarator_list ',' init_declarator;
+init_declarator_list: 
+	init_declarator { $$ = new init_declarator_list($1); }
+	| init_declarator_list ',' init_declarator { $$->add($3); };
 
-init_declarator: declarator '=' initializer | declarator;
+init_declarator: 
+	declarator '=' initializer { $$ = new init_declarator($1, $3); }
+	| declarator { $$ = new init_declarator($1, 0); };
 
-declarator: pointer direct_declarator | direct_declarator;
+declarator: 
+	pointer direct_declarator { $$ = new declarator($1, $2); }
+	| direct_declarator { $$ = new declarator(0, $1); };
 
 direct_declarator: 
-	IDENTIFIER 					{ } /* <- Name of the function */
-	| MODULE_NAME 				{ } /* <- Name of the module */
-	| TESTBENCH_NAME 			{ } /* <- Name of the testbench */
-	| '(' declarator ')'
-	| direct_declarator '[' ']'
-	| direct_declarator '[' constant_expression ':' constant_expression ']'
+	IDENTIFIER { $$ = new direct_declarator($1,0,0,0,0,0,0,0,0,0,0,0,0,0); } /* <- Name of the function */
+	| '(' declarator ')' { $$ = new direct_declarator(0,0,0,$2,0,0,0,0,0,0,0,0,0,0); }
+	| direct_declarator '[' ']' { $$->add(0,0,0,0,0,0,0,0,0,1,0,0,0,0); }
+	| direct_declarator '[' constant_expression ':' constant_expression ']' { $$->add(0,0,0,0,$3,$5,0,0,0,1,0,0,0,0); }
 	| direct_declarator '['
 		constant_expression ':' constant_expression ';'
-		constant_expression ':' constant_expression ']'
-	| direct_declarator '[' '*' ']'
-	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']'
-	| direct_declarator '[' STATIC assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list '*' ']'
-	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list ']'
-	| direct_declarator '[' assignment_expression ']'
-	| direct_declarator '(' parameter_type_list ')'
-	| direct_declarator '(' ')'
-	| direct_declarator '(' identifier_list ')';
+		constant_expression ':' constant_expression ']' { $$->add(0,0,0,0,$3,$5,$7,$9,0,1,0,0,0,0); }
+	| direct_declarator '[' '*' ']' { $$->add(0,0,0,0,0,0,0,0,0,1,0,0,0,0); }
+	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']' { $$->add(0,0,0,0,0,0,0,0,1,1,$4,$5,0,0); }
+	| direct_declarator '[' STATIC assignment_expression ']' { $$->add(0,0,0,0,0,0,0,0,1,1,0,$4,0,0); }
+	| direct_declarator '[' type_qualifier_list '*' ']' { $$->add(0,0,0,0,0,0,0,0,0,1,$3,0,0,0); }
+	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' { $$->add(0,0,0,0,0,0,0,0,1,1,$3,$5,0,0); }
+	| direct_declarator '[' type_qualifier_list assignment_expression ']' { $$->add(0,0,0,0,0,0,0,0,0,1,$3,$4,0,0); }
+	| direct_declarator '[' type_qualifier_list ']' { $$->add(0,0,0,0,0,0,0,0,0,1,$3,0,0,0); }
+	| direct_declarator '[' assignment_expression ']' { $$->add(0,0,0,0,0,0,0,0,0,1,0,$3,0,0); }
+	| direct_declarator '(' parameter_type_list ')' { $$->add(0,0,0,0,0,0,0,0,0,0,0,0,$3,0); }
+	| direct_declarator '(' ')' { $$->add(0,0,0,0,0,0,0,0,0,0,0,0,0,0); }
+	| direct_declarator '(' identifier_list ')' { $$->add(0,0,0,0,0,0,0,0,0,0,0,0,0,$3); };
 
-pointer: /* TODO */
-	'*' type_qualifier_list pointer
-	| '*' type_qualifier_list
-	| '*' pointer
-	| '*';
+pointer:
+	'*' type_qualifier_list pointer { if(!$$->add($2, $3)) $$ = new pointer($2, $3); }
+	| '*' type_qualifier_list { if(!$$->add($2, 0)) $$ = new pointer($2, 0); }
+	| '*' pointer { if(!$$->add(0, $2)) $$ = new pointer(0, $2); }
+	| '*' { if(!$$->add(0, (pointer*)1)) $$ = new pointer(0, (pointer*)1); };
 
 type_qualifier_list:
 	type_qualifier { $$ = new type_qualifier_list($1); }
@@ -339,30 +352,30 @@ abstract_declarator:
 	| direct_abstract_declarator { $$ = new abstract_declarator(0, $1); };
 
 direct_abstract_declarator:
-	'(' abstract_declarator ')'
-	| '[' ']'
-	| '[' constant_expression ':' constant_expression ']'
+	'(' abstract_declarator ')' { $$ = new direct_abstract_declarator($2,0,0,0,0,0,0,0,0,0); }
+	| '[' ']' { $$ = new direct_abstract_declarator(0,1,0,0,0,0,0,0,0,0); }
+	| '[' constant_expression ':' constant_expression ']' { $$ = new direct_abstract_declarator(0,1,$2,$4,0,0,0,0,0,0); }
 	| '[' constant_expression ':' constant_expression ';'
-		constant_expression ':' constant_expression ']'
-	| '[' '*' ']'
-	| '[' STATIC type_qualifier_list assignment_expression ']'
-	| '[' STATIC assignment_expression ']'
-	| '[' type_qualifier_list STATIC assignment_expression ']'
-	| '[' type_qualifier_list assignment_expression ']'
-	| '[' type_qualifier_list ']'
-	| '[' assignment_expression ']'
-	| direct_abstract_declarator '[' ']'
-	| direct_abstract_declarator '[' '*' ']'
-	| direct_abstract_declarator '[' STATIC type_qualifier_list assignment_expression ']'
-	| direct_abstract_declarator '[' STATIC assignment_expression ']'
-	| direct_abstract_declarator '[' type_qualifier_list assignment_expression ']'
-	| direct_abstract_declarator '[' type_qualifier_list STATIC assignment_expression ']'
-	| direct_abstract_declarator '[' type_qualifier_list ']'
-	| direct_abstract_declarator '[' assignment_expression ']'
-	| '(' ')'
-	| '(' parameter_type_list ')'
-	| direct_abstract_declarator '(' ')'
-	| direct_abstract_declarator '(' parameter_type_list ')'
+		constant_expression ':' constant_expression ']' { $$ = new direct_abstract_declarator(0,1,$2,$4,$6,$8,0,0,0,0); }
+	| '[' '*' ']' { $$ = new direct_abstract_declarator(0,1,0,0,0,0,0,0,0,0); }
+	| '[' STATIC type_qualifier_list assignment_expression ']' { $$ = new direct_abstract_declarator(0,1,0,0,0,0,1,$3,$4,0); }
+	| '[' STATIC assignment_expression ']' { $$ = new direct_abstract_declarator(0,1,0,0,0,0,1,0,$3,0); }
+	| '[' type_qualifier_list STATIC assignment_expression ']' { $$ = new direct_abstract_declarator(0,1,0,0,0,0,1,$2,$4,0); }
+	| '[' type_qualifier_list assignment_expression ']' { $$ = new direct_abstract_declarator(0,1,0,0,0,0,0,$2,$3,0); }
+	| '[' type_qualifier_list ']' { $$ = new direct_abstract_declarator(0,1,0,0,0,0,1,$2,0,0); }
+	| '[' assignment_expression ']' { $$ = new direct_abstract_declarator(0,1,0,0,0,0,0,0,$2,0); }
+	| direct_abstract_declarator '[' ']' { $$->add(0,1,0,0,0,0,0,0,0,0); }
+	| direct_abstract_declarator '[' '*' ']' { $$->add(0,1,0,0,0,0,0,0,0,0); }
+	| direct_abstract_declarator '[' STATIC type_qualifier_list assignment_expression ']' { $$->add(0,1,0,0,0,0,1,$4,$5,0); }
+	| direct_abstract_declarator '[' STATIC assignment_expression ']' { $$->add(0,1,0,0,0,0,1,0,$4,0); }
+	| direct_abstract_declarator '[' type_qualifier_list assignment_expression ']'  { $$->add(0,1,0,0,0,0,0,$3,$4,0); }
+	| direct_abstract_declarator '[' type_qualifier_list STATIC assignment_expression ']' { $$->add(0,1,0,0,0,0,1,$3,$5,0); }
+	| direct_abstract_declarator '[' type_qualifier_list ']' { $$->add(0,1,0,0,0,0,1,$3,0,0); }
+	| direct_abstract_declarator '[' assignment_expression ']'  { $$->add(0,1,0,0,0,0,0,0,$3,0); }
+	| '(' ')'  { $$ = new direct_abstract_declarator(0,0,0,0,0,0,0,0,0,0); }
+	| '(' parameter_type_list ')' { $$ = new direct_abstract_declarator(0,0,0,0,0,0,0,0,0,$2); }
+	| direct_abstract_declarator '(' ')' { $$->add(0,0,0,0,0,0,0,0,0,0); }
+	| direct_abstract_declarator '(' parameter_type_list ')'  { $$->add(0,0,0,0,0,0,0,0,0,$3); }
 	;
 
 initializer:
@@ -382,14 +395,15 @@ designator_list:
 	designator { $$ = new designator_list($1); }
 	| designator_list designator { $$->add($2); };
 
-designator: '[' constant_expression ']'
-	| '.' IDENTIFIER
-	| '[' constant_expression ':' constant_expression ']'
+designator: 
+	'[' constant_expression ']' { $$ = new designator(0, $2, 0, 0, 0); }
+	| '.' IDENTIFIER  { $$ = new designator($2, 0, 0, 0, 0); }
+	| '[' constant_expression ':' constant_expression ']' { $$ = new designator(0, $2, $4, 0, 0); }
 	| '[' constant_expression ':' constant_expression ';'
-		constant_expression ':' constant_expression ']';
+		constant_expression ':' constant_expression ']' { $$ = new designator(0, $2, $4, $6, $8); }
 
 static_assert_declaration: 
-	STATIC_ASSERT '(' constant_expression ',' STRING_LITERAL ')' ';';
+	STATIC_ASSERT '(' constant_expression ',' STRING_LITERAL ')' ';' { $$ = new static_assert_declaration($3); };
 
 	/* Types: */
 storage_class_specifier: 
@@ -432,147 +446,208 @@ struct_declaration_list:
 	| struct_declaration_list struct_declaration { $$->add($2); };
 
 struct_declaration:
-	specifier_qualifier_list ';' /* For anonymous struct/union */
-	| specifier_qualifier_list struct_declarator_list ';'
-	| static_assert_declaration
+	specifier_qualifier_list ';' { $$ = new struct_declaration($1, 0, 0); } /* For anonymous struct/union */
+	| specifier_qualifier_list struct_declarator_list ';' { $$ = new struct_declaration($1, $2, 0); }
+	| static_assert_declaration { $$ = new struct_declaration(0, 0, $1); };
 
 specifier_qualifier_list:
-	type_specifier specifier_qualifier_list
-	| type_specifier
-	| type_qualifier specifier_qualifier_list
-	| type_qualifier;
+	type_specifier specifier_qualifier_list { if(!$$->add($1,0)) $$ = new specifier_qualifier_list($1,0); }
+	| type_specifier { if(!$$->add($1,0)) $$ = new specifier_qualifier_list($1,0); }
+	| type_qualifier specifier_qualifier_list { if(!$$->add(0,$1)) $$ = new specifier_qualifier_list(0,$1); }
+	| type_qualifier { if(!$$->add(0,$1)) $$ = new specifier_qualifier_list(0,$1); };
 
-struct_declarator_list: struct_declarator
-	| struct_declarator_list ',' struct_declarator;
+struct_declarator_list: 
+	struct_declarator { $$ = new struct_declarator_list($1); }
+	| struct_declarator_list ',' struct_declarator { $$ = new struct_declarator_list($3); };
 
-struct_declarator: ':' constant_expression
-	| declarator ':' constant_expression
-	| declarator;
+struct_declarator: 
+	':' constant_expression { $$ = new struct_declarator($2, 0); }
+	| declarator ':' constant_expression { $$ = new struct_declarator($3, $1); }
+	| declarator { $$ = new struct_declarator(0, $1); };
 
 enum_specifier:
-	| ENUM '{' enumerator_list '}'
-	| ENUM '{' enumerator_list ',' '}'
-	| ENUM IDENTIFIER '{' enumerator_list '}'
-	| ENUM IDENTIFIER '{' enumerator_list ',' '}'
-	| ENUM IDENTIFIER;
+	{ $$ = new enum_specifier(0, 0); }
+	| ENUM '{' enumerator_list '}' { $$ = new enum_specifier($3, 0); }
+	| ENUM '{' enumerator_list ',' '}' { $$ = new enum_specifier($3, 0); }
+	| ENUM IDENTIFIER '{' enumerator_list '}' { $$ = new enum_specifier($4, $2); }
+	| ENUM IDENTIFIER '{' enumerator_list ',' '}'  { $$ = new enum_specifier($4, $2); }
+	| ENUM IDENTIFIER  { $$ = new enum_specifier(0, $2); };
 
-enumerator_list: enumerator | enumerator_list ',' enumerator;
+enumerator_list: 
+	enumerator { $$ = new enumerator_list($1); }
+	| enumerator_list ',' enumerator { $$->add($3); };
 
-enumerator: enumeration_constant '=' constant_expression | enumeration_constant;
+enumerator: 
+	enumeration_constant '=' constant_expression { $$ = new enumerator($1, $3); } 
+	| enumeration_constant { $$ = new enumerator($1, 0); } ;
 
-type_qualifier: CONST | OUTPUT | INPUT | INOUT | POSEDGE | NEGEDGE;
+type_qualifier: 
+	CONST { $$ = new type_qualifier($1); }
+	| OUTPUT { $$ = new type_qualifier($1); }
+	| INPUT { $$ = new type_qualifier($1); }
+	| INOUT { $$ = new type_qualifier($1); }
+	| POSEDGE { $$ = new type_qualifier($1); }
+	| NEGEDGE { $$ = new type_qualifier($1); };
 
 /* Access keywords: */
 struct_access: 
 	PUBLIC ':' { $$ = new struct_access($1); }
 	| PRIVATE ':' { $$ = new struct_access($1); };
 
-function_specifier: INLINE;
+function_specifier: 
+	INLINE { $$ = new function_specifier($1); };
 
-alignment_specifier: ALIGNAS '(' type_name ')' | ALIGNAS '(' constant_expression ')';
+alignment_specifier: 
+	ALIGNAS '(' type_name ')' { $$ = new alignment_specifier($3, 0); }
+	| ALIGNAS '(' constant_expression ')' { $$ = new alignment_specifier(0, $3); };
 
 	/* Expressions and constants: */
-primary_expression: IDENTIFIER | constant | string | '(' expression ')' | generic_selection;
+primary_expression: 
+	IDENTIFIER { $$ = new primary_expression($1, 0, 0, 0, 0); }
+	| constant { $$ = new primary_expression(0, $1, 0, 0, 0); }
+	| string { $$ = new primary_expression(0, 0, $1, 0, 0); }
+	| '(' expression ')' { $$ = new primary_expression(0, 0, 0, $2, 0); }
+	| generic_selection { $$ = new primary_expression(0, 0, 0, 0, $1); };
 
-constant: I_CONSTANT | F_CONSTANT | ENUMERATION_CONSTANT;
+constant:
+	I_CONSTANT { $$ = new constant($1, 0, 0); }
+	| F_CONSTANT  { $$ = new constant(0, $1, 0); }
+	| ENUMERATION_CONSTANT { $$ = new constant(0, 0, $1); };
 
-enumeration_constant: IDENTIFIER;
+enumeration_constant: IDENTIFIER { $$ = new enumeration_constant($1); };
 
-string: STRING_LITERAL;
+string: STRING_LITERAL { $$ = new prod_string($1); };
 
-generic_selection: GENERIC '(' assignment_expression ',' generic_assoc_list ')';
+generic_selection: /* XXX: Unimplemented */
+	GENERIC '(' assignment_expression ',' generic_assoc_list ')';
 
-generic_assoc_list: generic_association | generic_assoc_list ',' generic_association;
+generic_assoc_list: /* XXX: Unimplemented */
+	generic_association 
+	| generic_assoc_list ',' generic_association;
 
-generic_association: type_name ':' assignment_expression
+generic_association: /* XXX: Unimplemented */
+	type_name ':' assignment_expression
 	| DEFAULT ':' assignment_expression;
 
-postfix_expression: primary_expression
-	| postfix_expression '[' expression ']'
-	| postfix_expression '[' constant_expression ':' constant_expression ']'
+postfix_expression: 
+	primary_expression { $$ = new postfix_expression($1, 0, 0); }
+	| postfix_expression '[' expression ']' { $$->add($3,0,0,0,0,0,0,0); }
+	| postfix_expression '[' constant_expression ':' constant_expression ']' { $$->add(0,$3,$5,0,0,0,0,0); }
 	| postfix_expression '['
 		constant_expression ':' constant_expression ';'
-		constant_expression ':' constant_expression ']'
-	| postfix_expression '(' ')'
-	| postfix_expression '(' argument_expression_list ')'
-	| postfix_expression '.' IDENTIFIER
-	| postfix_expression PTR_OP IDENTIFIER
-	| postfix_expression INC_OP
-	| postfix_expression DEC_OP
-	| '(' type_name ')' '{' initializer_list '}'
-	| '(' type_name ')' '{' initializer_list ',' '}';
+		constant_expression ':' constant_expression ']' { $$->add(0,$3,$5,$7,$9,0,0,0); }
+	| postfix_expression '(' ')' { $$->add(0,0,0,0,0,0,0,0); }
+	| postfix_expression '(' argument_expression_list ')' { $$->add(0,0,0,0,0,$3,0,0); }
+	| postfix_expression '.' IDENTIFIER { $$->add(0,0,0,0,0,0,0,$3); }
+	| postfix_expression PTR_OP IDENTIFIER { $$->add(0,0,0,0,0,0,$2,$3); }
+	| postfix_expression INC_OP { $$->add(0,0,0,0,0,0,$2,0); }
+	| postfix_expression DEC_OP { $$->add(0,0,0,0,0,0,$2,0); }
+	| '(' type_name ')' '{' initializer_list '}'  { $$ = new postfix_expression(0, $2, $5); }
+	| '(' type_name ')' '{' initializer_list ',' '}'  { $$ = new postfix_expression(0, $2, $5); };
 
-argument_expression_list: assignment_expression
-	| argument_expression_list ',' assignment_expression;
+argument_expression_list: 
+	assignment_expression { $$ = new argument_expression_list($1); }
+	| argument_expression_list ',' assignment_expression { $$ = new argument_expression_list($3); };
 
-unary_expression: postfix_expression
-	| INC_OP unary_expression
-	| DEC_OP unary_expression
-	| unary_operator cast_expression
-	| SIZEOF unary_expression
-	| SIZEOF '(' type_name ')'
-	| ALIGNOF '(' type_name ')';
+unary_expression: 
+	postfix_expression { if(!$$->add($1,0,0,0,0,0,0)) $$ = new unary_expression($1,0,0,0,0,0,0); }
+	| INC_OP unary_expression { if(!$$->add(0,$1,0,0,0,0,0)) $$ = new unary_expression(0,$1,0,0,0,0,0); }
+	| DEC_OP unary_expression { if(!$$->add(0,$1,0,0,0,0,0)) $$ = new unary_expression(0,$1,0,0,0,0,0); }
+	| unary_operator cast_expression { if(!$$->add(0,0,$1,$2,0,0,0)) $$ = new unary_expression(0,0,$1,$2,0,0,0); }
+	| SIZEOF unary_expression { if(!$$->add(0,0,0,0,$1,0,0)) $$ = new unary_expression(0,0,0,0,$1,0,0); }
+	| SIZEOF '(' type_name ')' { if(!$$->add(0,0,0,0,$1,$3,0)) $$ = new unary_expression(0,0,0,0,$1,$3,0); }
+	| ALIGNOF '(' type_name ')' { if(!$$->add(0,0,0,0,0,$3,$1)) $$ = new unary_expression(0,0,0,0,0,$3,$1); };
 
-unary_operator: '&' | '*' | '+' | '-' | '~' | '!';
+unary_operator: 
+	'&' { $$ = new unary_operator('&'); }
+	| '*' { $$ = new unary_operator('*'); }
+	| '+' { $$ = new unary_operator('+'); }
+	| '-' { $$ = new unary_operator('-'); }
+	| '~' { $$ = new unary_operator('~'); }
+	| '!' { $$ = new unary_operator('!'); };
 
-cast_expression: unary_expression
-	| '(' type_name ')' cast_expression;
+cast_expression: 
+	unary_expression { $$ = new cast_expression($1, 0, 0); }
+	| '(' type_name ')' cast_expression { $$ = new cast_expression(0,$2,$4); };
 
-multiplicative_expression: cast_expression
+multiplicative_expression:
+	cast_expression
 	| multiplicative_expression '*' cast_expression
 	| multiplicative_expression '/' cast_expression
 	| multiplicative_expression '%' cast_expression;
 
-additive_expression: multiplicative_expression
+additive_expression: 
+	multiplicative_expression
 	| additive_expression '+' multiplicative_expression;
 	| additive_expression '-' multiplicative_expression;
 
-shift_expression: additive_expression
+shift_expression: 
+	additive_expression
 	| shift_expression LEFT_OP additive_expression
 	| shift_expression RIGHT_OP additive_expression;
 
-relational_expression: shift_expression
+relational_expression: 
+	shift_expression
 	| relational_expression '<' shift_expression
 	| relational_expression '>' shift_expression
 	| relational_expression LE_OP shift_expression
 	| relational_expression GE_OP shift_expression;
 
-equality_expression: relational_expression
+equality_expression: 
+	relational_expression
 	| equality_expression EQ_OP relational_expression
 	| equality_expression NEQ_OP relational_expression;
 
-and_expression: equality_expression
+and_expression: 
+	equality_expression
 	| and_expression '&' equality_expression;
 
-exclusive_or_expression: and_expression
+exclusive_or_expression: 
+	and_expression
 	| exclusive_or_expression '^' and_expression;
 
-inclusive_or_expression: exclusive_or_expression
+inclusive_or_expression: 
+	exclusive_or_expression
 	| inclusive_or_expression '|' exclusive_or_expression;
 
-logical_and_expression: inclusive_or_expression
+logical_and_expression: 
+	inclusive_or_expression
 	| logical_and_expression AND_OP inclusive_or_expression;
 
-logical_or_expression: logical_and_expression
+logical_or_expression: 
+	logical_and_expression
 	| logical_or_expression OR_OP logical_and_expression;
 
-conditional_expression: logical_or_expression
+conditional_expression: 
+	logical_or_expression
 	| logical_or_expression '?' expression ':' conditional_expression;
 
-assignment_expression: conditional_expression
+assignment_expression: 
+	conditional_expression
 	| unary_expression assignment_operator assignment_expression;
 
 assignment_operator:
-	'=' | MUL_ASSIGN | DIV_ASSIGN | MOD_ASSIGN | ADD_ASSIGN | SUB_ASSIGN
-	| LEFT_ASSIGN | RIGHT_ASSIGN | AND_ASSIGN | XOR_ASSIGN | OR_ASSIGN;
+	'=' 
+	| MUL_ASSIGN 
+	| DIV_ASSIGN 
+	| MOD_ASSIGN 
+	| ADD_ASSIGN 
+	| SUB_ASSIGN
+	| LEFT_ASSIGN 
+	| RIGHT_ASSIGN 
+	| AND_ASSIGN 
+	| XOR_ASSIGN 
+	| OR_ASSIGN;
 
-expression: assignment_expression
+expression: 
+	assignment_expression
 	| expression ',' assignment_expression;
 
 constant_expression: conditional_expression;
 
 	/* Statements: */
-statement: labeled_statement
+statement: 
+	labeled_statement
 	| compound_statement
 	| expression_statement
 	| selection_statement
@@ -593,9 +668,13 @@ block_item_list:
 	block_item
 	| block_item_list block_item;
 
-block_item: declaration | statement;
+block_item: 
+	declaration 
+	| statement;
 
-expression_statement: ';' | expression ';';
+expression_statement: 
+	';' 
+	| expression ';';
 
 selection_statement:
 	IF '(' expression ')' statement ELSE statement

@@ -177,8 +177,12 @@ typedef union YYSTYPE
 	struct_or_union * struct_or_union_v;
 	struct_declaration_list * struct_declaration_list_v;
 	struct_declaration * struct_declaration_v;
+	struct_declarator_list * struct_declarator_list_v;
+	struct_declarator * struct_declarator_v;
 	specifier_qualifier_list * specifier_qualifier_list_v;
 	enum_specifier * enum_specifier_v;
+	enumerator_list * enumerator_list_v;
+	enumerator * enumerator_v;
 	parameter_type_list * parameter_type_list_v;
 	parameter_list * parameter_list_v;
 	parameter_declaration * parameter_declaration_v;
@@ -230,7 +234,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 234 "parser.tab.h"
+#line 238 "parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

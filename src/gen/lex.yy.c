@@ -1359,12 +1359,12 @@ return DO;
 case 93:
 YY_RULE_SETUP
 #line 136 "src/lex.l"
-return PUBLIC;
+{ yylval.uival = PUBLIC; return PUBLIC; }
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
 #line 137 "src/lex.l"
-return PRIVATE;
+{ yylval.uival = PRIVATE; return PRIVATE; }
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
@@ -1475,7 +1475,7 @@ YY_RULE_SETUP
 case 116:
 YY_RULE_SETUP
 #line 164 "src/lex.l"
-{ return STRING_LITERAL; }
+{ yylval.sval = strdup(yytext); return STRING_LITERAL; }
 	YY_BREAK
 case 117:
 YY_RULE_SETUP

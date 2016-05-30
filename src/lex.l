@@ -133,8 +133,8 @@ break			return BREAK;
 continue		return CONTINUE;
 do				return DO;
 
-public			return PUBLIC;
-private			return PRIVATE;
+public			{ yylval.uival = PUBLIC; return PUBLIC; }
+private			{ yylval.uival = PRIVATE; return PRIVATE; }
 
 module			return MODULE;
 testbench		return TESTBENCH;
@@ -161,8 +161,8 @@ negedge			return NEGEDGE;
 {HP}{H}*"."{H}+{P}{FS}?			{ return F_CONSTANT; }
 {HP}{H}+"."{P}{FS}?				{ return F_CONSTANT; }
 
-({SP}?\"([^"\\\n]|{ES})*\"{WS}*)+	{ return STRING_LITERAL; }
-{L}{A}*						{ return sym_check_type(); }
+({SP}?\"([^"\\\n]|{ES})*\"{WS}*)+ { yylval.sval = strdup(yytext); return STRING_LITERAL; }
+{L}{A}*							{ return sym_check_type(); }
 .							;
 [ \t\n]        				yylineno++;
 
