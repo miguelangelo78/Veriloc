@@ -1455,7 +1455,7 @@ YY_RULE_SETUP
 case 109:
 YY_RULE_SETUP
 #line 155 "src/lex.l"
-{ yylval.sval = new char[strlen(yytext)+1]; strcpy(yylval.sval, yytext); return ENUMERATION_CONSTANT; }
+{ yylval.sval = new char[strlen(yytext)+1]; strcpy(yylval.sval, yytext); return VERIL_CONSTANT; }
 	YY_BREAK
 case 110:
 YY_RULE_SETUP

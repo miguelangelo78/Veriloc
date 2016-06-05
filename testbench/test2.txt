@@ -1,29 +1,39 @@
-module counter {
-	input reg clk; reset, en;
-	output reg out[3:0];
+module PRBYTES {
+	input osc, rate, reset;
+	output reg serout;
 
-	always(posedge clk) {
-		if(reset == 1)
-			out <= 0;
-		elsif(en == 1)
-			out <= out + 1;
-	}
-};
+	reg sbc[3:0];
+	reg brd[10:0];
+	reg sr[30:0];
 
-testbench counter_tb {
-	counter ctr;
+	wire baudclk, sbczero, sbcnine;
 
-	counter_tb() {
-		reset = 0;
-		en = 0;
-		clk = 0;
-		#100 reset = 1;
-		#100 reset = 0;
-		#100 en = 1;
-		#100 en = 0;
+	PRBYTES() {
+		baudclk = rate & brd[7] | ~rate & brd[10];
+		sbczero = ~sbc[3] & ~sbc[2] & ~sbc[1] & ~sbc[0];
+		sbcnine = sbc[3] & ~sbc[2] & ~sbc[1] & sbc[0];
 	}
 
-	always {
-		#100 clk = ~clk;
+	always(posedge osc) {
+		if(reset) brd <= 0;
+		else brd <= brd + 1;
+	}
+
+	always(posedge baudclk) {
+		if(reset) sbc <= 0;
+		elsif(sbcnine) sbc <= 4b0000;
+		else sbc <= sbc + 1;
+	}
+
+	always(posedge baudclk) {
+		if(reset) sr[0] <= 0;
+		else {
+			sr[30:1] <= sr[29:0];
+			sr[0] <= ~(sr[30] ^ sr[27]);
+		}
+	}
+
+	always(posedge baudclk) {
+		serout <= (~sbczero & sr[30]) | sbcnine;
 	}
 };

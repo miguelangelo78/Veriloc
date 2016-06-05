@@ -192,7 +192,7 @@
 %token <uival> PUBLIC PRIVATE
 %token <uival> INPUT OUTPUT INOUT CONFIG FORCE POSEDGE NEGEDGE <sval> IDENTIFIER 
 %token <ival> I_CONSTANT <fval> F_CONSTANT <sval> D_CONSTANT STRING_LITERAL
-%token <sval> TYPEDEF_NAME <sval> ENUMERATION_CONSTANT GENERIC STATIC_ASSERT
+%token <sval> TYPEDEF_NAME <sval> ENUMERATION_CONSTANT VERIL_CONSTANT GENERIC STATIC_ASSERT
 %token <sval> MODULE_NAME <sval> TESTBENCH_NAME <sval> GLOBAL_SRC
 
 %start source
@@ -487,9 +487,10 @@ primary_expression:
 	| generic_selection { $$ = new primary_expression(0, 0, 0, 0, $1); };
 
 constant:
-	I_CONSTANT { $$ = new constant($1, 0, 0, 1); }
-	| F_CONSTANT  { $$ = new constant(0, $1, 0, 2); }
-	| ENUMERATION_CONSTANT { $$ = new constant(0, 0, $1, 3); };
+	I_CONSTANT { $$ = new constant($1, 0, 0, 0, 1); }
+	| F_CONSTANT  { $$ = new constant(0, $1, 0, 0, 2); }
+	| ENUMERATION_CONSTANT { $$ = new constant(0, 0, $1, 0, 3); }
+	| VERIL_CONSTANT { $$ = new constant(0, 0, 0, $1, 4) };
 
 enumeration_constant: IDENTIFIER { $$ = new enumeration_constant($1); };
 

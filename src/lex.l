@@ -152,7 +152,7 @@ negedge			{ yylval.uival = NEGEDGE; return NEGEDGE; }
 -?{NZ}{D}*{IS}?					{ yylval.uival = atoi(yytext); return I_CONSTANT; }
 -?"0"{O}*{IS}?					{ yylval.uival = atoi(yytext); return I_CONSTANT; }
 -?{CP}?"'"([^'\\\n]|{ES})+"'"	{ yylval.uival = atoi(yytext); return I_CONSTANT; }
--?{D}+(b|d|o|h)(s|u)?{HV}+		{ yylval.sval = new char[strlen(yytext)+1]; strcpy(yylval.sval, yytext); return ENUMERATION_CONSTANT; }
+-?{D}+(b|d|o|h)(s|u)?{HV}+		{ yylval.sval = new char[strlen(yytext)+1]; strcpy(yylval.sval, yytext); return VERIL_CONSTANT; }
 
 {D}+{E}{FS}?					{ yylval.fval = atof(yytext); return F_CONSTANT; }
 {D}*"."{D}+{E}?{FS}?			{ yylval.fval = atof(yytext); return F_CONSTANT; }

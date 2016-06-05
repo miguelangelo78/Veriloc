@@ -122,11 +122,12 @@
      STRING_LITERAL = 338,
      TYPEDEF_NAME = 339,
      ENUMERATION_CONSTANT = 340,
-     GENERIC = 341,
-     STATIC_ASSERT = 342,
-     MODULE_NAME = 343,
-     TESTBENCH_NAME = 344,
-     GLOBAL_SRC = 345
+     VERIL_CONSTANT = 341,
+     GENERIC = 342,
+     STATIC_ASSERT = 343,
+     MODULE_NAME = 344,
+     TESTBENCH_NAME = 345,
+     GLOBAL_SRC = 346
    };
 #endif
 
@@ -228,7 +229,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 232 "parser.tab.h"
+#line 233 "parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

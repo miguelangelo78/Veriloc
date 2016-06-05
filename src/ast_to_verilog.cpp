@@ -177,6 +177,17 @@ string constant_to_string(primary_expression * prim_expr) {
 				return ftos(prim_expr->con->f_constant);
 			case 3:
 				return prim_expr->con->enum_constant;
+			case 4: {
+				string v_const = prim_expr->con->veril_constant;
+				/* Convert VeriloC constant to VeriloG constant. Example: 4b0001 => 4'b0001 */
+				int index_of_base = 0;
+				for(int i=0;i<v_const.size();i++)
+					if(v_const[i]!='b' && v_const[i]!='d' && v_const[i]!='o' && v_const[i]!='h')
+						index_of_base++;
+					else
+						break;
+				return v_const.substr(0,index_of_base) + "'" +  v_const.substr(index_of_base, v_const.size());
+			}
 			default: return "";
 			}
 		else {
@@ -186,7 +197,15 @@ string constant_to_string(primary_expression * prim_expr) {
 	}
 }
 
-string const_expr_to_str(arith_logic_expression * expr, char op_carry) {
+string postfix_to_str(postfix_expression * post) {
+	string str = "";
+	if(post->prim_expr) str += constant_to_string(post->prim_expr);
+	if(post->expr) str += "[" + ast_expr_stat(post->expr, 0, 0) + "]";
+	if(post->expr1) str += "[" + const_expr_to_str(post->expr1->cond_expr) + ":" +  const_expr_to_str(post->expr2->cond_expr) + "]";
+	return str;
+}
+
+string const_expr_to_str(arith_logic_expression * expr) {
 	string str = "";
 	int i = 0;
 
@@ -195,32 +214,42 @@ string const_expr_to_str(arith_logic_expression * expr, char op_carry) {
 			/* This happens when we reach the end of the branch and no operator was found  */
 			for(auto cast_expr : expr->cast_expr) { /* This is a point where recursion ends */
 				string str_tmp = "";
-				if(cast_expr->un_expr && cast_expr->un_expr->post_expr)
-					str_tmp += constant_to_string(cast_expr->un_expr->post_expr->prim_expr);
-				else { /* Found an unary operator */
-					str_tmp += operator_to_str(cast_expr->un_expr->un_op->op) + constant_to_string(cast_expr->un_expr->cast_expr->un_expr->post_expr->prim_expr);
-				}
-				/* Look for function calls: */
 				if(cast_expr->un_expr && cast_expr->un_expr->post_expr) {
-					if(cast_expr->un_expr->post_expr->arg_expr_list) {
+					str_tmp += postfix_to_str(cast_expr->un_expr->post_expr);
+				}
+				else { /* Found a unary operator */
+					str_tmp += operator_to_str(cast_expr->un_expr->un_op->op)
+							+ postfix_to_str(cast_expr->un_expr->cast_expr->un_expr->post_expr);
+				}
+
+				if(cast_expr->un_expr && cast_expr->un_expr->post_expr) {
+					postfix_expression * post_expr = cast_expr->un_expr->post_expr;
+					/* Look for function calls: */
+					if(post_expr->arg_expr_list) {
 						/* We found a function call with arguments */
 						str_tmp += "(";
 						int ctr = 0;
-						for(auto aexpr : cast_expr->un_expr->post_expr->arg_expr_list->assign_expr)
-							str_tmp += const_expr_to_str(aexpr->cond_expr) + (ctr++<cast_expr->un_expr->post_expr->arg_expr_list->assign_expr.size()-1 ? ", " : "");
+						for(auto aexpr : post_expr->arg_expr_list->assign_expr)
+							str_tmp += const_expr_to_str(aexpr->cond_expr) + (ctr++<post_expr->arg_expr_list->assign_expr.size()-1 ? ", " : "");
 						str_tmp += ")";
-					} else if(cast_expr->un_expr->post_expr->is_func) {
+					} else if(post_expr->is_func) {
 						/* We found a function call without arguments */
 						str_tmp += "()";
 					}
 				}
 
-				/* Look for increments/decrements: */
-				if(cast_expr->un_expr->inc_dec_op.size())
+				/* Look for increments/decrements/array indexing: */
+				if(cast_expr->un_expr->inc_dec_op.size()) {
+					/* Look for increments/decrements: */
 					for(auto inc_dec : cast_expr->un_expr->inc_dec_op)
 						str += operator_to_str(inc_dec);
-				if(cast_expr->un_expr && cast_expr->un_expr->post_expr && cast_expr->un_expr->post_expr->op)
-					str_tmp += operator_to_str(cast_expr->un_expr->post_expr->op);
+				}
+				if(cast_expr->un_expr && cast_expr->un_expr->post_expr) {
+					/* Look for increments/decrements: */
+					if(cast_expr->un_expr->post_expr->op)
+						str_tmp += operator_to_str(cast_expr->un_expr->post_expr->op);
+				}
+
 				str += str_tmp;
 			}
 			break;
@@ -235,13 +264,9 @@ string const_expr_to_str(arith_logic_expression * expr, char op_carry) {
 			str += constant_to_string(cast_expr->un_expr->post_expr->prim_expr) + (i<expr->op.size()? " " + operator_to_str(expr->op[i++]) + " " : "");
 	} else { /* Or is it anything else? */
 		for(auto math_expr : expr->math_expr) /* Recursion through all new-found branches */
-			str += const_expr_to_str(math_expr, 1) + (i < expr->op.size() ? (op_carry ? "" : " ") + operator_to_str(expr->op[i++]) + " " : "");
+			str += const_expr_to_str(math_expr) + (i < expr->op.size() ? " " + operator_to_str(expr->op[i++]) + " " : "");
 	}
 	return str;
-}
-
-string const_expr_to_str(arith_logic_expression * expr) {
-	return const_expr_to_str(expr, 0);
 }
 
 string const_expr_to_str(conditional_expression * condexpr) {
@@ -363,7 +388,7 @@ string ast_sel_stat(selection_statement * sel, unsigned int idl) {
 
 		/* Statement 2: */
 		if(sel->stat2)
-			str += "\n" + iden(idl) + "end\n" + iden(idl) + "else\n" + iden(idl) + "begin\n" + general_statement_to_str(sel->stat2, idl);
+			str += iden(idl) + "end\n" + iden(idl) + "else\n" + iden(idl) + "begin\n" + general_statement_to_str(sel->stat2, idl);
 
 		str += iden(idl) + "end\n";
 	}
@@ -447,8 +472,8 @@ string ast_expr_stat(expression * expr, char terminate, unsigned int idl) {
 		str += iden(idl);
 		if(expr->assign_expr[0]->un_expr.size() > 0) {
 			unary_expression * un_expr = expr->assign_expr[0]->un_expr[0];
-			string op = !expr->assign_expr[0]->assign_op[0]->op ? "=" :  operator_to_str(expr->assign_expr[0]->assign_op[0]->op);
-			str += string(un_expr->post_expr->prim_expr->id) + " " + op + " ";
+			string op = !expr->assign_expr[0]->assign_op[0]->op ? "=" : operator_to_str(expr->assign_expr[0]->assign_op[0]->op);
+			str += postfix_to_str(un_expr->post_expr) + " " + op + " ";
 		}
 		str += const_expr_to_str(expr->assign_expr[0]->cond_expr);
 		str += (terminate ? ";\n" : "");

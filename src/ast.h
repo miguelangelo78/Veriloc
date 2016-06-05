@@ -803,6 +803,7 @@ public:
 		char * id,
 		char is_func
 	) {
+		this->expr = expr;
 		this->expr1 = expr1;
 		this->expr2 = expr2;
 		this->expr3 = expr3;
@@ -993,15 +994,17 @@ public:
 	float f_constant;
 	int i_constant;
 	char * enum_constant;
+	char * veril_constant;
 	char which;
 
 	constant(
 		int i_constant,
 		float f_constant,
 		char * enum_constant,
+		char * veril_constant,
 		char which
 	)
-	: f_constant(f_constant), i_constant(i_constant), enum_constant(enum_constant), which(which) { }
+	: f_constant(f_constant), i_constant(i_constant), enum_constant(enum_constant), veril_constant(veril_constant), which(which) { }
 };
 
 class enumeration_constant {
