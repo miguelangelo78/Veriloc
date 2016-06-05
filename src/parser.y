@@ -88,6 +88,7 @@
 	iteration_statement * iteration_statement_v;
 	jump_statement * jump_statement_v;
 	always_statement * always_statement_v;
+	delay_statement * delay_statement_v;
 };
 
 	/* Production types: */
@@ -174,6 +175,7 @@
 %type <iteration_statement_v> iteration_statement
 %type <jump_statement_v> jump_statement
 %type <always_statement_v> always_statement
+%type <delay_statement_v> delay_statement
 
 	/* Token Operators: */
 %token <uival> EQ_OP NEQ_OP ELLIPSIS RIGHT_ASSIGN LEFT_ASSIGN ADD_ASSIGN SUB_ASSIGN
@@ -189,7 +191,7 @@
 %token WHILE FOR DO MODULE TESTBENCH ASSIGN ALWAYS
 %token <uival> PUBLIC PRIVATE
 %token <uival> INPUT OUTPUT INOUT CONFIG FORCE POSEDGE NEGEDGE <sval> IDENTIFIER 
-%token <ival> I_CONSTANT <fval> F_CONSTANT <sval> STRING_LITERAL
+%token <ival> I_CONSTANT <fval> F_CONSTANT <sval> D_CONSTANT STRING_LITERAL
 %token <sval> TYPEDEF_NAME <sval> ENUMERATION_CONSTANT GENERIC STATIC_ASSERT
 %token <sval> MODULE_NAME <sval> TESTBENCH_NAME <sval> GLOBAL_SRC
 
@@ -211,7 +213,7 @@ translation_unit:
 	external_declaration { $$ = new translation_unit($1);  }
 	| translation_unit external_declaration { $$->add($2); }
 
-	/* Shell of the language: */
+	/* 'Shell' of the language: */
 translation_unit_context:
 	{ $$ = new translation_unit_context(0); }
 	| external_declaration_internal { $$ = new translation_unit_context($1); }
@@ -312,6 +314,7 @@ parameter_declaration:
 
 identifier_list: 
 	IDENTIFIER { $$ = new identifier_list($1, 0); }
+	| type_qualifier IDENTIFIER { $$ = new identifier_list($2, $1); }
 	| identifier_list ',' IDENTIFIER { $$->add($3, 0); }
 	| identifier_list '.' IDENTIFIER { $$->add($3, 0); }
 	| identifier_list ',' type_qualifier IDENTIFIER { $$->add($4, $3); };
@@ -602,6 +605,7 @@ assignment_expression:
 
 assignment_operator:
 	'=' { $$ = new assignment_operator(0); }
+	| LE_OP { $$ = new assignment_operator($1); }
 	| MUL_ASSIGN { $$ = new assignment_operator($1); }
 	| DIV_ASSIGN { $$ = new assignment_operator($1); }
 	| MOD_ASSIGN { $$ = new assignment_operator($1); }
@@ -622,13 +626,14 @@ constant_expression:
 
 	/* Statements: */
 statement: 
-	labeled_statement { $$ = new statement($1,0,0,0,0,0,0); }
-	| compound_statement { $$ = new statement(0,$1,0,0,0,0,0); }
-	| expression_statement { $$ = new statement(0,0,$1,0,0,0,0); }
-	| selection_statement { $$ = new statement(0,0,0,$1,0,0,0); }
-	| iteration_statement { $$ = new statement(0,0,0,0,$1,0,0); }
-	| jump_statement { $$ = new statement(0,0,0,0,0,$1,0); }
-	| always_statement { $$ = new statement(0,0,0,0,0,0,$1); };
+	labeled_statement { $$ = new statement($1,0,0,0,0,0,0,0); }
+	| compound_statement { $$ = new statement(0,$1,0,0,0,0,0,0); }
+	| expression_statement { $$ = new statement(0,0,$1,0,0,0,0,0); }
+	| selection_statement { $$ = new statement(0,0,0,$1,0,0,0,0); }
+	| iteration_statement { $$ = new statement(0,0,0,0,$1,0,0,0); }
+	| jump_statement { $$ = new statement(0,0,0,0,0,$1,0,0); }
+	| always_statement { $$ = new statement(0,0,0,0,0,0,$1,0); } 
+	| delay_statement { $$ = new statement(0,0,0,0,0,0,0,$1); };
 
 labeled_statement:
 	IDENTIFIER ':' statement { $$ = new labeled_statement($1,$3,0); }
@@ -679,5 +684,10 @@ jump_statement:
 
 always_statement:
 	ALWAYS '(' identifier_list ')' statement { $$ = new always_statement($3,$5); }
-	| ALWAYS '(' ')' statement { $$ = new always_statement(0,$4); };
+	| ALWAYS '(' ')' statement { $$ = new always_statement(0,$4); }
+	| ALWAYS statement { $$ = new always_statement(0,$2); };
+	
+delay_statement:
+	D_CONSTANT { $$ = new delay_statement($1); }
+	| D_CONSTANT ';' { $$ = new delay_statement($1); };
 %%

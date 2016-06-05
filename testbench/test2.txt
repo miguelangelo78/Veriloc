@@ -1,33 +1,29 @@
-module id {
-	private:
-		wire output r;
-		wire r3;
-		id() {
-			r = 0xFFFFA;
-			r3 = 10hAFz1xX;
-		}
-		void func_test(int k) {}
-		void another(int i, int j){}
-	public:
-		void myfunction(int x){}
-};
+module counter {
+	input reg clk; reset, en;
+	output reg out[3:0];
 
-testbench id2 {
-
-};
-
-module id4 {
-public:
-	void yes() {
-
+	always(posedge clk) {
+		if(reset == 1)
+			out <= 0;
+		elsif(en == 1)
+			out <= out + 1;
 	}
 };
 
-testbench id3 {
+testbench counter_tb {
+	counter ctr;
 
-};
+	counter_tb() {
+		reset = 0;
+		en = 0;
+		clk = 0;
+		#100 reset = 1;
+		#100 reset = 0;
+		#100 en = 1;
+		#100 en = 0;
+	}
 
-struct mystruct {
-	char struct_var;
-	float another_var;
+	always {
+		#100 clk = ~clk;
+	}
 };

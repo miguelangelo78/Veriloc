@@ -118,14 +118,15 @@
      IDENTIFIER = 334,
      I_CONSTANT = 335,
      F_CONSTANT = 336,
-     STRING_LITERAL = 337,
-     TYPEDEF_NAME = 338,
-     ENUMERATION_CONSTANT = 339,
-     GENERIC = 340,
-     STATIC_ASSERT = 341,
-     MODULE_NAME = 342,
-     TESTBENCH_NAME = 343,
-     GLOBAL_SRC = 344
+     D_CONSTANT = 337,
+     STRING_LITERAL = 338,
+     TYPEDEF_NAME = 339,
+     ENUMERATION_CONSTANT = 340,
+     GENERIC = 341,
+     STATIC_ASSERT = 342,
+     MODULE_NAME = 343,
+     TESTBENCH_NAME = 344,
+     GLOBAL_SRC = 345
    };
 #endif
 
@@ -222,11 +223,12 @@ typedef union YYSTYPE
 	iteration_statement * iteration_statement_v;
 	jump_statement * jump_statement_v;
 	always_statement * always_statement_v;
+	delay_statement * delay_statement_v;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 230 "parser.tab.h"
+#line 232 "parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

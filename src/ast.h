@@ -84,6 +84,7 @@ class selection_statement_list;
 class iteration_statement;
 class jump_statement;
 class always_statement;
+class delay_statement;
 
 /************ AST's Root declarations: ************/
 class root {
@@ -1030,6 +1031,7 @@ public:
 	iteration_statement * iter_stat;
 	jump_statement * jmp_stat;
 	always_statement * always_stat;
+	delay_statement * delay_stat;
 
 	statement(
 		labeled_statement * label_stat,
@@ -1038,12 +1040,13 @@ public:
 		selection_statement * sel_stat,
 		iteration_statement * iter_stat,
 		jump_statement * jmp_stat,
-		always_statement * always_stat
+		always_statement * always_stat,
+		delay_statement * delay_stat
 	)
 	: label_stat(label_stat), comp_stat(comp_stat),
 	  expr_stat(expr_stat),sel_stat(sel_stat),
 	  iter_stat(iter_stat), jmp_stat(jmp_stat),
-	  always_stat(always_stat) { }
+	  always_stat(always_stat), delay_stat(delay_stat) { }
 };
 
 class labeled_statement {
@@ -1159,6 +1162,12 @@ public:
 	statement * stat;
 	always_statement(identifier_list * id_list, statement * stat)
 	: id_list(id_list), stat(stat) { }
+};
+
+class delay_statement {
+public:
+	char * delay_val;
+	delay_statement(char * delay_val) : delay_val(delay_val) {}
 };
 
 #endif

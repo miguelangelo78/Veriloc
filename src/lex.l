@@ -161,6 +161,8 @@ negedge			{ yylval.uival = NEGEDGE; return NEGEDGE; }
 {HP}{H}*"."{H}+{P}{FS}?			{ yylval.fval = atof(yytext); return F_CONSTANT; }
 {HP}{H}+"."{P}{FS}?				{ yylval.fval = atof(yytext); return F_CONSTANT; }
 
+#[0-9]+							{ yylval.sval = new char[strlen(yytext)+1]; strcpy(yylval.sval, yytext); return D_CONSTANT; }
+
 ({SP}?\"([^"\\\n]|{ES})*\"{WS}*)+ { yylval.sval = strdup(yytext); return STRING_LITERAL; }
 {L}{A}*							{ return sym_check_type(); }
 .							;

@@ -2,20 +2,21 @@
 #include <ast_to_verilog.h>
 
 /*****  TODO: ******/
-/* - Fix spaces */
-/* - Add support for NORMAL variables */
-/* - Add testbench support */
 /* - Add support for pin mapping */
-/* - Add delay constants */
-/* - Make use of the access modifiers */
+/* - Add support for functions - NEEDS RESEARCH */
+/* - Add support for NORMAL variables - NEEDS RESEARCH */
 /* - Add support for global code */
 /* - Add a preprocessor mechanism */
+/* - Add a type checker mechanism */
+/* - Make use of the access modifiers */
 
 /* Forward declarations: */
 string general_statement_to_str(statement * st, unsigned int idl_carry);
 string ast_always_stat(always_statement * always_stat, unsigned int idl);
 string ast_expr_stat(expression * expr, char terminate, unsigned int idl);
 string const_expr_to_str(conditional_expression * condexpr);
+string qualifier_to_str(unsigned int qualif);
+string type_to_str(unsigned int typespec);
 
 string itos(int i) {
 	char buff[10];
@@ -40,24 +41,77 @@ char * idenc(unsigned int level) {
 }
 
 string ast_module_argslist(root * mod) {
-	string arglist = "";
-	int ctr = 0;
+	string str = "";
+	int decl_ctr = 0;
+	int verilog_var_count = 0;
+	for(auto ext : mod->t_unit_ctx->ext_decl)
+		if(ext->var_def && ext->var_def->decl_spec->type_qualif.size() > 0) {
+			unsigned int qualif = ext->var_def->decl_spec->type_qualif[0]->qualifier;
+			if(qualif == INPUT || qualif == OUTPUT || qualif == INOUT)
+				verilog_var_count++;
+		}
+
 	for(auto ext : mod->t_unit_ctx->ext_decl) {
 		if(ext->var_def) {
 			declaration * var = ext->var_def;
+
+			/* Check it it's a valid declaration for the module arglist's purpose: */
+			if(var->decl_spec->type_qualif.size()) { /* Does it have a qualifier? */
+				unsigned int qualif = var->decl_spec->type_qualif[0]->qualifier;
+				if(qualif != INPUT && qualif != OUTPUT && qualif != INOUT) continue;
+			} else if(var->decl_spec->type_spec.size()) { /* Does it have a specifier instead? */
+				unsigned int type = var->decl_spec->type_spec[0]->type;
+				if(type != REG && type != WIRE) continue;
+			}
+
+			/* Declare qualifiers: */
+			if(var->decl_spec->type_qualif.size())
+				for(auto qualif : var->decl_spec->type_qualif)
+					str += qualifier_to_str(qualif->qualifier);
+			else
+				str+=", ";
+			if(var->decl_spec->type_spec.size() > 0 && decl_ctr < verilog_var_count)
+				str += " ";
+			/* Declare specifiers: */
 			for(auto type : var->decl_spec->type_spec)
-				if(type->type==REG || type->type==WIRE)
-					for(auto id : var->init_decl_list->init_decl)
-						arglist += (ctr++>0?", ":"") + std::string(id->decl->direct_decl->id);
-			ctr++;
+				str += type_to_str(type->type);
+			/* Output variable names: */
+			int ctr = 0;
+			for(auto id : var->init_decl_list->init_decl) {
+				unsigned int var_type = 0;
+
+				if(!var->decl_spec->type_spec.size()) var_type = WIRE; /* Default variable type */
+				else var_type = var->decl_spec->type_spec[0]->type;
+
+				if(var_type == REG || var_type == WIRE) {
+					str += (ctr++>0?",":"");
+
+					/* Handle arrays and constant expressions: */
+					string expr_l = "", expr_r = "";
+					if(id->decl->direct_decl->expr1.size() > 0) {
+						for(auto expr : id->decl->direct_decl->expr1) expr_l += const_expr_to_str(expr->cond_expr); expr_l += ":";
+						for(auto expr : id->decl->direct_decl->expr2) expr_l += const_expr_to_str(expr->cond_expr); expr_l = " [" + expr_l + "]";
+					}
+					if(id->decl->direct_decl->expr3.size() > 0) {
+						for(auto expr : id->decl->direct_decl->expr3) expr_r += const_expr_to_str(expr->cond_expr); expr_r += ":";
+						for(auto expr : id->decl->direct_decl->expr4) expr_r += const_expr_to_str(expr->cond_expr); expr_r = "[" + expr_r + "]";
+					}
+					str += expr_l + " " + id->decl->direct_decl->id + (expr_r.size() > 0 ? " " + expr_r : "");
+				}
+			}
+			if(decl_ctr++ < verilog_var_count-1)
+				str += ", ";
 		}
 	}
-	return arglist;
+	return str;
 }
 
 string operator_to_str(unsigned int op) {
 	string str = "";
 	switch(op) {
+	case '!': str = "!"; break;
+	case '~': str =  "~"; break;
+	case '#': str = "#"; break;
 	case '=': str = "="; break;
 	case '*': str ="*"; break;
 	case '/': str = "/"; break;
@@ -140,26 +194,32 @@ string const_expr_to_str(arith_logic_expression * expr, char op_carry) {
 		if(expr->cast_expr.size() > 0) { /* Have we reached the end of the branch? */
 			/* This happens when we reach the end of the branch and no operator was found  */
 			for(auto cast_expr : expr->cast_expr) { /* This is a point where recursion ends */
-				string str_tmp = constant_to_string(cast_expr->un_expr->post_expr->prim_expr) + (op_carry ? " " : "");
+				string str_tmp = "";
+				if(cast_expr->un_expr && cast_expr->un_expr->post_expr)
+					str_tmp += constant_to_string(cast_expr->un_expr->post_expr->prim_expr);
+				else { /* Found an unary operator */
+					str_tmp += operator_to_str(cast_expr->un_expr->un_op->op) + constant_to_string(cast_expr->un_expr->cast_expr->un_expr->post_expr->prim_expr);
+				}
 				/* Look for function calls: */
-				if(cast_expr->un_expr && cast_expr->un_expr->post_expr && cast_expr->un_expr->post_expr->arg_expr_list) {
-
-					/* We found a function call with arguments */
-					str_tmp += "(";
-					int ctr = 0;
-					for(auto aexpr : cast_expr->un_expr->post_expr->arg_expr_list->assign_expr)
-						str_tmp += const_expr_to_str(aexpr->cond_expr) + (ctr++<cast_expr->un_expr->post_expr->arg_expr_list->assign_expr.size()-1 ? ", " : "");
-					str_tmp += ")";
-				} else if(cast_expr->un_expr->post_expr->is_func) {
-					/* We found a function call without arguments */
-					str_tmp += "()";
+				if(cast_expr->un_expr && cast_expr->un_expr->post_expr) {
+					if(cast_expr->un_expr->post_expr->arg_expr_list) {
+						/* We found a function call with arguments */
+						str_tmp += "(";
+						int ctr = 0;
+						for(auto aexpr : cast_expr->un_expr->post_expr->arg_expr_list->assign_expr)
+							str_tmp += const_expr_to_str(aexpr->cond_expr) + (ctr++<cast_expr->un_expr->post_expr->arg_expr_list->assign_expr.size()-1 ? ", " : "");
+						str_tmp += ")";
+					} else if(cast_expr->un_expr->post_expr->is_func) {
+						/* We found a function call without arguments */
+						str_tmp += "()";
+					}
 				}
 
 				/* Look for increments/decrements: */
 				if(cast_expr->un_expr->inc_dec_op.size())
 					for(auto inc_dec : cast_expr->un_expr->inc_dec_op)
 						str += operator_to_str(inc_dec);
-				if(cast_expr->un_expr->post_expr->op)
+				if(cast_expr->un_expr && cast_expr->un_expr->post_expr && cast_expr->un_expr->post_expr->op)
 					str_tmp += operator_to_str(cast_expr->un_expr->post_expr->op);
 				str += str_tmp;
 			}
@@ -203,59 +263,14 @@ string const_expr_to_str(conditional_expression * condexpr) {
 
 string ast_var_decl(root * mod) {
 	string str = "";
-	char top_comment = 0;
-	for(auto ext : mod->t_unit_ctx->ext_decl) {
-		if(ext->var_def) {
-			declaration * var = ext->var_def;
-			char declared = 0;
-			/* Declare specifiers: */
-			for(auto type : var->decl_spec->type_spec) {
-				if(type->type == REG || type->type == WIRE) {
-					if(!top_comment) {
-						str += "\n/**** Variable and Parameter Declarations: ****/\n";
-						top_comment = 1;
-					}
-					declared = 1;
-				}
-				str += type_to_str(type->type) + " ";
-			}
-			/* Declare qualifiers: */
-			for(auto qualif : var->decl_spec->type_qualif)
-				str += qualifier_to_str(qualif->qualifier);
-			/* Output variable names: */
-			int ctr = 0;
-			for(auto id : var->init_decl_list->init_decl) {
-				unsigned int var_type = 0;
-
-				if(!var->decl_spec->type_spec.size()) var_type = WIRE; /* Default variable type */
-				else var_type = var->decl_spec->type_spec[0]->type;
-
-				/* TODO: Declare regular variables as well */
-				if(var_type == REG || var_type == WIRE) {
-					str += (ctr++>0?",":"");
-
-					/* Handle arrays and constant expressions: */
-					string expr_l = "", expr_r = "";
-					if(id->decl->direct_decl->expr1.size() > 0) {
-						for(auto expr : id->decl->direct_decl->expr1) expr_l += const_expr_to_str(expr->cond_expr); expr_l += ":";
-						for(auto expr : id->decl->direct_decl->expr2) expr_l += const_expr_to_str(expr->cond_expr); expr_l = " [" + expr_l + "]";
-					}
-					if(id->decl->direct_decl->expr3.size() > 0) {
-						for(auto expr : id->decl->direct_decl->expr3) expr_r += const_expr_to_str(expr->cond_expr); expr_r += ":";
-						for(auto expr : id->decl->direct_decl->expr4) expr_r += const_expr_to_str(expr->cond_expr); expr_r = "[" + expr_r + "]";
-					}
-					str += expr_l + " " + id->decl->direct_decl->id + (expr_r.size() > 0 ? " " + expr_r : "");
-				}
-			}
-			str += (declared ? ";\n" : "");
-		}
-	}
-	return str + "\n";
+	str += "__var__";
+	return str;
 }
 
-string ast_assign_outputs(root * mod) {
+string ast_assign_outputs(root * mod, char use_constructor) {
 	string str = "";
 	char is_assign_empty = 1;
+	if(!use_constructor) goto NO_CONSTR;
 	/* Grab just the variable assignments from the constructors */
 	for(auto ext_decl : mod->t_unit_ctx->ext_decl) {
 		if(ext_decl->func_def && ext_decl->func_def->direct_decl && ext_decl->func_def->comp_statement->b_item_list) {
@@ -287,6 +302,8 @@ string ast_assign_outputs(root * mod) {
 			}
 		}
 	}
+
+	NO_CONSTR: /* If we jump here then it means we are declaring a testbench, and we're using the constructor for the initial statmenent instead */
 
 	/* Also grab the initializations on the module's declarations: */
 	for(auto ext : mod->t_unit_ctx->ext_decl) {
@@ -430,7 +447,8 @@ string ast_expr_stat(expression * expr, char terminate, unsigned int idl) {
 		str += iden(idl);
 		if(expr->assign_expr[0]->un_expr.size() > 0) {
 			unary_expression * un_expr = expr->assign_expr[0]->un_expr[0];
-			str += string(un_expr->post_expr->prim_expr->id) + " = ";
+			string op = !expr->assign_expr[0]->assign_op[0]->op ? "=" :  operator_to_str(expr->assign_expr[0]->assign_op[0]->op);
+			str += string(un_expr->post_expr->prim_expr->id) + " " + op + " ";
 		}
 		str += const_expr_to_str(expr->assign_expr[0]->cond_expr);
 		str += (terminate ? ";\n" : "");
@@ -453,15 +471,19 @@ string ast_label_stat(labeled_statement * label, unsigned int idl) {
 	return str;
 }
 
+string ast_delay_stat(delay_statement * delay_stat, unsigned int idl) {
+	return iden(idl) + delay_stat->delay_val+";\n";
+}
+
 string always_sensitivity_list(always_statement * statement) {
-	if(!statement->id_list) return ""; /* Empty sensitivity list */
+	if(!statement->id_list) return "*"; /* Empty sensitivity list */
 	string str = "";
 	int i = 0;
 	for(auto spec : statement->id_list->type_qual) {
 		if(&spec->qualifier) { /* Qualifier found */
 			switch(spec->qualifier) {
-			case POSEDGE: str += "posedge " + string(statement->id_list->id[i]) + (i<statement->id_list->type_qual.size()-1 ? string(", ") : ""); break;
-			case NEGEDGE: str += "negedge " + string(statement->id_list->id[i]) + (i<statement->id_list->type_qual.size()-1 ? string(", ") : ""); break;
+			case POSEDGE: str += "posedge " + string(statement->id_list->id[i]) + (i<statement->id_list->type_qual.size()-1 ? string(" or ") : ""); break;
+			case NEGEDGE: str += "negedge " + string(statement->id_list->id[i]) + (i<statement->id_list->type_qual.size()-1 ? string(" or ") : ""); break;
 			}
 		}
 		else { /* There is no qualifier */
@@ -497,8 +519,18 @@ string ast_always_stat(root * mod) {
 	return str;
 }
 
+string ast_initial_stat(root * mod) {
+	string str = "";
+	for(auto ext_decl : mod->t_unit_ctx->ext_decl)
+		if(ext_decl->func_def && ext_decl->func_def->direct_decl && ext_decl->func_def->comp_statement->b_item_list)
+			/* Found constructor */
+			str += "\ninitial\nbegin\n" + ast_compound_stat(ext_decl->func_def->comp_statement,0) + "end\n";
+	return str;
+}
+
 string general_statement_to_str(statement * st, unsigned int idl_carry) {
 	if(st->always_stat) return ast_always_stat(st->always_stat, idl_carry+1);
+	if(st->delay_stat) return ast_delay_stat(st->delay_stat, idl_carry+1);
 	if(st->comp_stat) return ast_compound_stat(st->comp_stat, idl_carry);
 	if(st->expr_stat) return ast_expr_stat(st->expr_stat->expr, 1, idl_carry+1);
 	if(st->iter_stat) return ast_loop_stat(st->iter_stat, idl_carry+1);
@@ -512,12 +544,28 @@ string ast_module(root * mod) {
 	/* Declare module */
 	string str = "module " + string(mod->root_name) + "(" + ast_module_argslist(mod) + ");\n";
 	/* Declare variables and constants */
-	str += ast_var_decl(mod);
+	// TODO: str += ast_var_decl(mod);
 	/* Assign outputs */
-	str += ast_assign_outputs(mod);
+	str += ast_assign_outputs(mod, 1);
 	/* Add all "always" statements */
 	str += ast_always_stat(mod);
 	/* Close module declaration */
+	str += "endmodule\n\n";
+	return str;
+}
+
+string ast_testbench(root * testb) {
+	/* Declare testbench */
+	string str = "module " + string(testb->root_name) + ";\n";
+	/* Declare variables and constants */
+	// TODO: str += ast_var_decl(testb);
+	/* Assign outputs: */
+	str += ast_assign_outputs(testb, 0); /* Assign only on declaration, not on constructor */
+	/* Add all "always" statements */
+	str += ast_always_stat(testb);
+	/* Add initial statement (use constructors) */
+	str += ast_initial_stat(testb);
+	/* Close testbench declaration */
 	str += "endmodule\n\n";
 	return str;
 }
@@ -530,7 +578,7 @@ void ast_convert(std::vector<root*> & roots) {
 			printf(ast_module(root).c_str()); /* Declare module */
 			break;
 		case TESTBENCH_NAME:
-
+			printf(ast_testbench(root).c_str()); /* Declare testbench */
 			break;
 		case GLOBAL_SRC: break;
 		default: break;
