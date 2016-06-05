@@ -1,7 +1,12 @@
 module id {
 	private:
+		wire output r;
+		wire r3;
+		id() {
+			r = 0xFFFFA;
+			r3 = 10hAFz1xX;
+		}
 		void func_test(int k) {}
-		char myvar;
 		void another(int i, int j){}
 	public:
 		void myfunction(int x){}

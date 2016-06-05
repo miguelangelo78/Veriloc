@@ -67,19 +67,19 @@
      BOOL = 283,
      FLOAT = 284,
      DOUBLE = 285,
-     AUTO = 286,
-     REG = 287,
-     WIRE = 288,
-     CONST = 289,
-     SIGNED = 290,
-     UNSIGNED = 291,
-     LONG = 292,
-     SHORT = 293,
-     TYPEDEF = 294,
-     STATIC = 295,
-     ENUM = 296,
-     UNION = 297,
-     STRUCT = 298,
+     REG = 286,
+     WIRE = 287,
+     CONST = 288,
+     SIGNED = 289,
+     UNSIGNED = 290,
+     LONG = 291,
+     SHORT = 292,
+     TYPEDEF = 293,
+     STATIC = 294,
+     ENUM = 295,
+     UNION = 296,
+     STRUCT = 297,
+     AUTO = 298,
      THIS = 299,
      DEFINE = 300,
      INCLUDE = 301,
@@ -205,16 +205,7 @@ typedef union YYSTYPE
 	unary_expression * unary_expression_v;
 	unary_operator * unary_operator_v;
 	cast_expression * cast_expression_v;
-	multiplicative_expression * multiplicative_expression_v;
-	additive_expression * additive_expression_v;
-	shift_expression * shift_expression_v;
-	relational_expression * relational_expression_v;
-	equality_expression * equality_expression_v;
-	and_expression * and_expression_v;
-	exclusive_or_expression * exclusive_or_expression_v;
-	inclusive_or_expression * inclusive_or_expression_v;
-	logical_and_expression * logical_and_expression_v;
-	logical_or_expression * logical_or_expression_v;
+	arith_logic_expression * arith_logic_expression_v;
 	conditional_expression * conditional_expression_v;
 	assignment_expression * assignment_expression_v;
 	assignment_operator * assignment_operator_v;
@@ -227,6 +218,7 @@ typedef union YYSTYPE
 	block_item * block_item_v;
 	expression_statement * expression_statement_v;
 	selection_statement * selection_statement_v;
+	selection_statement_list * selection_statement_list_v;
 	iteration_statement * iteration_statement_v;
 	jump_statement * jump_statement_v;
 	always_statement * always_statement_v;
@@ -234,7 +226,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 238 "parser.tab.h"
+#line 230 "parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

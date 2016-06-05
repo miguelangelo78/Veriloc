@@ -71,16 +71,7 @@
 	unary_expression * unary_expression_v;
 	unary_operator * unary_operator_v;
 	cast_expression * cast_expression_v;
-	multiplicative_expression * multiplicative_expression_v;
-	additive_expression * additive_expression_v;
-	shift_expression * shift_expression_v;
-	relational_expression * relational_expression_v;
-	equality_expression * equality_expression_v;
-	and_expression * and_expression_v;
-	exclusive_or_expression * exclusive_or_expression_v;
-	inclusive_or_expression * inclusive_or_expression_v;
-	logical_and_expression * logical_and_expression_v;
-	logical_or_expression * logical_or_expression_v;
+	arith_logic_expression * arith_logic_expression_v;
 	conditional_expression * conditional_expression_v;
 	assignment_expression * assignment_expression_v;
 	assignment_operator * assignment_operator_v;
@@ -93,6 +84,7 @@
 	block_item * block_item_v;
 	expression_statement * expression_statement_v;
 	selection_statement * selection_statement_v;
+	selection_statement_list * selection_statement_list_v;
 	iteration_statement * iteration_statement_v;
 	jump_statement * jump_statement_v;
 	always_statement * always_statement_v;
@@ -156,16 +148,16 @@
 %type <unary_expression_v> unary_expression
 %type <unary_operator_v> unary_operator
 %type <cast_expression_v> cast_expression
-%type <multiplicative_expression_v> multiplicative_expression
-%type <additive_expression_v> additive_expression
-%type <shift_expression_v> shift_expression
-%type <relational_expression_v> relational_expression
-%type <equality_expression_v> equality_expression
-%type <and_expression_v> and_expression
-%type <exclusive_or_expression_v> exclusive_or_expression
-%type <inclusive_or_expression_v> inclusive_or_expression
-%type <logical_and_expression_v> logical_and_expression
-%type <logical_or_expression_v> logical_or_expression
+%type <arith_logic_expression_v> multiplicative_expression
+%type <arith_logic_expression_v> additive_expression
+%type <arith_logic_expression_v> shift_expression
+%type <arith_logic_expression_v> relational_expression
+%type <arith_logic_expression_v> equality_expression
+%type <arith_logic_expression_v> and_expression
+%type <arith_logic_expression_v> exclusive_or_expression
+%type <arith_logic_expression_v> inclusive_or_expression
+%type <arith_logic_expression_v> logical_and_expression
+%type <arith_logic_expression_v> logical_or_expression
 %type <conditional_expression_v> conditional_expression
 %type <assignment_expression_v> assignment_expression
 %type <assignment_operator_v> assignment_operator
@@ -178,6 +170,7 @@
 %type <block_item_v> block_item
 %type <expression_statement_v> expression_statement
 %type <selection_statement_v> selection_statement
+%type <selection_statement_list_v> selection_statement_list
 %type <iteration_statement_v> iteration_statement
 %type <jump_statement_v> jump_statement
 %type <always_statement_v> always_statement
@@ -188,10 +181,10 @@
 %token <uival> RIGHT_OP LEFT_OP INC_OP DEC_OP PTR_OP AND_OP OR_OP GE_OP LE_OP
 
 	/* Token Keywords: */
-%token <uival> VOID INT CHAR BOOL FLOAT DOUBLE AUTO REG WIRE 
-%token <uival> CONST SIGNED UNSIGNED LONG SHORT TYPEDEF STATIC ENUM UNION STRUCT
+%token <uival> VOID INT CHAR BOOL FLOAT DOUBLE REG WIRE 
+%token <uival> CONST SIGNED UNSIGNED LONG SHORT TYPEDEF STATIC ENUM UNION STRUCT AUTO
 %token <uival> THIS DEFINE INCLUDE PRAGMA EXTERN INLINE SIZEOF ALIGNAS ALIGNOF
-%token <sval> RETURN GOTO BREAK CONTINUE
+%token <uival> RETURN GOTO BREAK CONTINUE
 %token IF ELSE ELSIF SWITCH CASE DEFAULT
 %token WHILE FOR DO MODULE TESTBENCH ASSIGN ALWAYS
 %token <uival> PUBLIC PRIVATE
@@ -251,36 +244,16 @@ declaration:
 	| static_assert_declaration { $$ = new declaration(0, 0, $1); };
 
 declaration_specifiers:
-	storage_class_specifier declaration_specifiers { 
-			if(!$$->add($1,0,0,0,0)) $$ = new declaration_specifiers($1,0,0,0,0);
-		}
-	| storage_class_specifier { 
-			if(!$$->add($1,0,0,0,0)) $$ = new declaration_specifiers($1,0,0,0,0); 
-		}
-	| type_specifier declaration_specifiers { 
-			if(!$$->add(0,$1,0,0,0)) $$ = new declaration_specifiers(0,$1,0,0,0);
-		}
-	| type_specifier {
-			if(!$$->add(0,$1,0,0,0)) $$ = new declaration_specifiers(0,$1,0,0,0); 
-		}
-	| type_qualifier declaration_specifiers { 
-			if(!$$->add(0,0,$1,0,0)) $$ = new declaration_specifiers(0,0,$1,0,0); 
-		}
-	| type_qualifier { 
-			if(!$$->add(0,0,$1,0,0)) $$ = new declaration_specifiers(0,0,$1,0,0); 
-		}
-	| function_specifier declaration_specifiers { 
-			if(!$$->add(0,0,0,$1,0)) $$ = new declaration_specifiers(0,0,0,$1,0); 
-		}
-	| function_specifier { 
-			if(!$$->add(0,0,0,$1,0)) $$ = new declaration_specifiers(0,0,0,$1,0); 	
-		}
-	| alignment_specifier declaration_specifiers { 
-			if(!$$->add(0,0,0,0,$1)) $$ = new declaration_specifiers(0,0,0,0,$1); 	
-		}
-	| alignment_specifier { 
-			if(!$$->add(0,0,0,0,$1)) $$ = new declaration_specifiers(0,0,0,0,$1); 		
-	};
+	storage_class_specifier declaration_specifiers { $$ = $2; $$->add($1,0,0,0,0); }
+	| storage_class_specifier { $$ = new declaration_specifiers($1,0,0,0,0); }
+	| type_specifier declaration_specifiers { $$ = $2; $$->add(0,$1,0,0,0); }
+	| type_specifier { $$ = new declaration_specifiers(0,$1,0,0,0);  }
+	| type_qualifier declaration_specifiers { $$ = $2; $$->add(0,0,$1,0,0); }
+	| type_qualifier { $$ = new declaration_specifiers(0,0,$1,0,0); }
+	| function_specifier declaration_specifiers { $$ = $2; $$->add(0,0,0,$1,0); }
+	| function_specifier { $$ = new declaration_specifiers(0,0,0,$1,0); }
+	| alignment_specifier declaration_specifiers { $$ = $2; $$->add(0,0,0,0,$1); }
+	| alignment_specifier { $$ = new declaration_specifiers(0,0,0,0,$1); };
 
 init_declarator_list: 
 	init_declarator { $$ = new init_declarator_list($1); }
@@ -315,10 +288,10 @@ direct_declarator:
 	| direct_declarator '(' identifier_list ')' { $$->add(0,0,0,0,0,0,0,0,0,0,0,0,0,$3); };
 
 pointer:
-	'*' type_qualifier_list pointer { if(!$$->add($2, $3)) $$ = new pointer($2, $3); }
-	| '*' type_qualifier_list { if(!$$->add($2, 0)) $$ = new pointer($2, 0); }
-	| '*' pointer { if(!$$->add(0, $2)) $$ = new pointer(0, $2); }
-	| '*' { if(!$$->add(0, (pointer*)1)) $$ = new pointer(0, (pointer*)1); };
+	'*' type_qualifier_list pointer { $$ = $3; $$->add($2, $3); }
+	| '*' type_qualifier_list { $$ = new pointer($2, 0); }
+	| '*' pointer { $$ = $2; $$->add(0, $2); }
+	| '*' { $$ = new pointer(0, (pointer*)1); };
 
 type_qualifier_list:
 	type_qualifier { $$ = new type_qualifier_list($1); }
@@ -452,10 +425,10 @@ struct_declaration:
 	| static_assert_declaration { $$ = new struct_declaration(0, 0, $1); };
 
 specifier_qualifier_list:
-	type_specifier specifier_qualifier_list { if(!$$->add($1,0)) $$ = new specifier_qualifier_list($1,0); }
-	| type_specifier { if(!$$->add($1,0)) $$ = new specifier_qualifier_list($1,0); }
-	| type_qualifier specifier_qualifier_list { if(!$$->add(0,$1)) $$ = new specifier_qualifier_list(0,$1); }
-	| type_qualifier { if(!$$->add(0,$1)) $$ = new specifier_qualifier_list(0,$1); };
+	type_specifier specifier_qualifier_list { $$ = $2; $$->add($1,0); }
+	| type_specifier { $$ = new specifier_qualifier_list($1,0); }
+	| type_qualifier specifier_qualifier_list { $$ = $2; $$->add(0,$1); }
+	| type_qualifier { $$ = new specifier_qualifier_list(0,$1); };
 
 struct_declarator_list: 
 	struct_declarator { $$ = new struct_declarator_list($1); }
@@ -511,9 +484,9 @@ primary_expression:
 	| generic_selection { $$ = new primary_expression(0, 0, 0, 0, $1); };
 
 constant:
-	I_CONSTANT { $$ = new constant($1, 0, 0); }
-	| F_CONSTANT  { $$ = new constant(0, $1, 0); }
-	| ENUMERATION_CONSTANT { $$ = new constant(0, 0, $1); };
+	I_CONSTANT { $$ = new constant($1, 0, 0, 1); }
+	| F_CONSTANT  { $$ = new constant(0, $1, 0, 2); }
+	| ENUMERATION_CONSTANT { $$ = new constant(0, 0, $1, 3); };
 
 enumeration_constant: IDENTIFIER { $$ = new enumeration_constant($1); };
 
@@ -532,32 +505,32 @@ generic_association: /* XXX: Unimplemented */
 
 postfix_expression: 
 	primary_expression { $$ = new postfix_expression($1, 0, 0); }
-	| postfix_expression '[' expression ']' { $$->add($3,0,0,0,0,0,0,0); }
-	| postfix_expression '[' constant_expression ':' constant_expression ']' { $$->add(0,$3,$5,0,0,0,0,0); }
+	| postfix_expression '[' expression ']' { $$->add($3,0,0,0,0,0,0,0,0); }
+	| postfix_expression '[' constant_expression ':' constant_expression ']' { $$->add(0,$3,$5,0,0,0,0,0,0); }
 	| postfix_expression '['
 		constant_expression ':' constant_expression ';'
-		constant_expression ':' constant_expression ']' { $$->add(0,$3,$5,$7,$9,0,0,0); }
-	| postfix_expression '(' ')' { $$->add(0,0,0,0,0,0,0,0); }
-	| postfix_expression '(' argument_expression_list ')' { $$->add(0,0,0,0,0,$3,0,0); }
-	| postfix_expression '.' IDENTIFIER { $$->add(0,0,0,0,0,0,0,$3); }
-	| postfix_expression PTR_OP IDENTIFIER { $$->add(0,0,0,0,0,0,$2,$3); }
-	| postfix_expression INC_OP { $$->add(0,0,0,0,0,0,$2,0); }
-	| postfix_expression DEC_OP { $$->add(0,0,0,0,0,0,$2,0); }
+		constant_expression ':' constant_expression ']' { $$->add(0,$3,$5,$7,$9,0,0,0,0); }
+	| postfix_expression '(' ')' { $$->add(0,0,0,0,0,0,0,0,1); }
+	| postfix_expression '(' argument_expression_list ')' { $$->add(0,0,0,0,0,$3,0,0,1); }
+	| postfix_expression '.' IDENTIFIER { $$->add(0,0,0,0,0,0,0,$3,0); }
+	| postfix_expression PTR_OP IDENTIFIER { $$->add(0,0,0,0,0,0,$2,$3,0); }
+	| postfix_expression INC_OP { $$->add(0,0,0,0,0,0,$2,0,0); }
+	| postfix_expression DEC_OP { $$->add(0,0,0,0,0,0,$2,0,0); }
 	| '(' type_name ')' '{' initializer_list '}'  { $$ = new postfix_expression(0, $2, $5); }
 	| '(' type_name ')' '{' initializer_list ',' '}'  { $$ = new postfix_expression(0, $2, $5); };
 
 argument_expression_list: 
 	assignment_expression { $$ = new argument_expression_list($1); }
-	| argument_expression_list ',' assignment_expression { $$ = new argument_expression_list($3); };
+	| argument_expression_list ',' assignment_expression { $$->add($3); };
 
 unary_expression: 
-	postfix_expression { if(!$$->add($1,0,0,0,0,0,0)) $$ = new unary_expression($1,0,0,0,0,0,0); }
-	| INC_OP unary_expression { if(!$$->add(0,$1,0,0,0,0,0)) $$ = new unary_expression(0,$1,0,0,0,0,0); }
-	| DEC_OP unary_expression { if(!$$->add(0,$1,0,0,0,0,0)) $$ = new unary_expression(0,$1,0,0,0,0,0); }
-	| unary_operator cast_expression { if(!$$->add(0,0,$1,$2,0,0,0)) $$ = new unary_expression(0,0,$1,$2,0,0,0); }
-	| SIZEOF unary_expression { if(!$$->add(0,0,0,0,$1,0,0)) $$ = new unary_expression(0,0,0,0,$1,0,0); }
-	| SIZEOF '(' type_name ')' { if(!$$->add(0,0,0,0,$1,$3,0)) $$ = new unary_expression(0,0,0,0,$1,$3,0); }
-	| ALIGNOF '(' type_name ')' { if(!$$->add(0,0,0,0,0,$3,$1)) $$ = new unary_expression(0,0,0,0,0,$3,$1); };
+	postfix_expression { $$ = new unary_expression($1,0,0,0,0,0,0); }
+	| INC_OP unary_expression { $$ = $2;  $$->add(0,$1,0,0,0,0,0); }
+	| DEC_OP unary_expression { $$ = $2; $$->add(0,$1,0,0,0,0,0); }
+	| unary_operator cast_expression { $$ = new unary_expression(0,0,$1,$2,0,0,0); }
+	| SIZEOF unary_expression { $$ = $2; $$->add(0,0,0,0,$1,0,0); }
+	| SIZEOF '(' type_name ')' { $$ = new unary_expression(0,0,0,0,$1,$3,0); }
+	| ALIGNOF '(' type_name ')' { $$ = new unary_expression(0,0,0,0,0,$3,$1); };
 
 unary_operator: 
 	'&' { $$ = new unary_operator('&'); }
@@ -572,60 +545,60 @@ cast_expression:
 	| '(' type_name ')' cast_expression { $$ = new cast_expression(0,$2,$4); };
 
 multiplicative_expression:
-	cast_expression { $$ = new multiplicative_expression($1,0); }
+	cast_expression { $$ = new arith_logic_expression($1,0); }
 	| multiplicative_expression '*' cast_expression { $$->add($3,'*'); }
 	| multiplicative_expression '/' cast_expression { $$->add($3,'/'); }
 	| multiplicative_expression '%' cast_expression { $$->add($3,'%'); };
 
 additive_expression:
-	multiplicative_expression { $$ = new additive_expression($1,0); }
+	multiplicative_expression { $$ = new arith_logic_expression($1,0); }
 	| additive_expression '+' multiplicative_expression { $$->add($3,'+'); }
 	| additive_expression '-' multiplicative_expression { $$->add($3,'-'); };
 
 shift_expression:
-	additive_expression { $$ = new shift_expression($1,0); }
+	additive_expression { $$ = new arith_logic_expression($1,0); }
 	| shift_expression LEFT_OP additive_expression { $$->add($3,$2); }
 	| shift_expression RIGHT_OP additive_expression { $$->add($3,$2); };
 
 relational_expression:
-	shift_expression { $$ = new relational_expression($1,0); }
+	shift_expression { $$ = new arith_logic_expression($1,0); }
 	| relational_expression '<' shift_expression { $$->add($3,'<'); }
 	| relational_expression '>' shift_expression { $$->add($3,'>'); }
 	| relational_expression LE_OP shift_expression { $$->add($3,$2); }
 	| relational_expression GE_OP shift_expression { $$->add($3,$2); };
 
 equality_expression:
-	relational_expression { $$ = new equality_expression($1,0); }
+	relational_expression { $$ = new arith_logic_expression($1,0); }
 	| equality_expression EQ_OP relational_expression { $$->add($3,EQ_OP); }
 	| equality_expression NEQ_OP relational_expression { $$->add($3,NEQ_OP); };
 
 and_expression:
-	equality_expression { $$ = new and_expression($1,0); }
+	equality_expression { $$ = new arith_logic_expression($1,0); }
 	| and_expression '&' equality_expression { $$->add($3,'&'); };
 
 exclusive_or_expression:
-	and_expression { $$ = new exclusive_or_expression($1,0); }
+	and_expression { $$ = new arith_logic_expression($1,0); }
 	| exclusive_or_expression '^' and_expression { $$->add($3,'^'); };
 
 inclusive_or_expression:
-	exclusive_or_expression { $$ = new inclusive_or_expression($1,0); }
+	exclusive_or_expression { $$ = new arith_logic_expression($1,0); }
 	| inclusive_or_expression '|' exclusive_or_expression { $$->add($3,'|'); };
 
 logical_and_expression:
-	inclusive_or_expression { $$ = new logical_and_expression($1,0); }
+	inclusive_or_expression { $$ = new arith_logic_expression($1,0); }
 	| logical_and_expression AND_OP inclusive_or_expression { $$->add($3,AND_OP); };
 
 logical_or_expression: 
-	logical_and_expression { $$ = new logical_or_expression($1,0); }
+	logical_and_expression { $$ = new arith_logic_expression($1,0); }
 	| logical_or_expression OR_OP logical_and_expression { $$->add($3,OR_OP); };
 
 conditional_expression:
-	logical_or_expression  { if(!$$->add($1, 0)) $$ = new conditional_expression($1,0); }
-	| logical_or_expression '?' expression ':' conditional_expression { if(!$$->add($1, $3)) $$ = new conditional_expression($1,$3); };
+	logical_or_expression  { $$ = new conditional_expression($1,0); }
+	| logical_or_expression '?' expression ':' conditional_expression { $$ = $5; $$->add($1, $3); };
 
 assignment_expression: 
-	conditional_expression { if(!$$->add($1,0,0)) $$ = new assignment_expression($1,0,0); }
-	| unary_expression assignment_operator assignment_expression { if(!$$->add(0,$1,$2)) $$ = new assignment_expression(0,$1,$2); };
+	conditional_expression { $$ = new assignment_expression($1,0,0); } /* Ternary IF */
+	| unary_expression assignment_operator assignment_expression { $$ = $3; $$->add(0,$1,$2); };
 
 assignment_operator:
 	'=' { $$ = new assignment_operator(0); }
@@ -678,11 +651,15 @@ expression_statement:
 	';' { $$ = new expression_statement(0); }
 	| expression ';' { $$ = new expression_statement($1); };
 
+selection_statement_list:
+	ELSIF '(' expression ')' statement {  $$ = new selection_statement_list($3,$5); }
+	| selection_statement_list ELSIF '(' expression ')' statement { $$->add($4,$6); }
+	
 selection_statement:
 	IF '(' expression ')' statement ELSE statement { $$ = new selection_statement(0,$3,0,$5,$7,0); }
-	| IF '(' expression ')' statement ELSIF '(' expression ')' statement { $$ = new selection_statement(0,$3,$8,$5,$10,0); }
-	| IF '(' expression ')' statement ELSIF '(' expression ')' statement ELSE statement { $$ = new selection_statement(0,$3,$8,$5,$10,$12); }
 	| IF '(' expression')' statement { $$ = new selection_statement(0,$3,0,$5,0,0); }
+	| IF '(' expression')' statement selection_statement_list { $$ = new selection_statement(0,$3,0,$5,0,$6); }
+	| IF '(' expression')' statement selection_statement_list ELSE statement { $$ = new selection_statement(0,$3,0,$5,$8,$6); }
 	| SWITCH '(' expression ')' statement { $$ = new selection_statement(1,$3,0,$5,0,0); };
 
 iteration_statement:
@@ -694,11 +671,11 @@ iteration_statement:
 	| FOR '(' declaration expression_statement expression ')' statement { $$ = new iteration_statement(2,$5,$7,$4,0,$3); };
 
 jump_statement:
-	GOTO IDENTIFIER ';' { $$ = new jump_statement($1,$2,0); }
-	| CONTINUE ';' { $$ = new jump_statement($1,0,0); }
-	| BREAK ';' { $$ = new jump_statement($1,0,0); }
-	| RETURN ';' { $$ = new jump_statement($1,0,0); }
-	| RETURN expression ';' { $$ = new jump_statement($1,0,$2); };
+	GOTO IDENTIFIER ';' { $$ = new jump_statement(0,$2,0); }
+	| CONTINUE ';' { $$ = new jump_statement(1,0,0); }
+	| BREAK ';' { $$ = new jump_statement(2,0,0); }
+	| RETURN ';' { $$ = new jump_statement(3,0,0); }
+	| RETURN expression ';' { $$ = new jump_statement(3,0,$2); };
 
 always_statement:
 	ALWAYS '(' identifier_list ')' statement { $$ = new always_statement($3,$5); }

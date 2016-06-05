@@ -2,6 +2,8 @@
 #include <map>
 #include <ast_to_verilog.h>
 
+#define DEBUG 0
+
 map<string, int> sym_table;
 
 void sym_add(char * key, int token_id) {
@@ -10,7 +12,8 @@ void sym_add(char * key, int token_id) {
 }
 
 int sym_check_type(void) {
-	yylval.sval = strdup(yytext);
+	yylval.sval = new char[strlen(yytext)+1];
+	strcpy(yylval.sval, yytext);
 	/* Fetch symbol type from map: */
 	if(sym_table.find(yytext) != sym_table.end())
 		return sym_table.at(yytext);
@@ -54,17 +57,18 @@ int main(int argc, char ** argv) {
 		ast_init();
 		/* Parse it:  */
 		yyin = file;
-		printf(">> Parsing %s...\n\n", argv[1]);
+		printf(">> Parsing %s...\n", argv[1]);
 		yyparse();
-		printf("\n>> Parsing of %s finished\n>> Converting AST (Abstract Syntax Tree) to Verilog\n\n",
+		printf(">> Parsing of %s finished\n>> Converting AST (Abstract Syntax Tree) to Verilog\n",
 			argv[1]);
-
-		/* Convert tree into Verilog source code: */
-		ast_convert();
+#if DEBUG == 1
 		ast_dump();
+#endif
+		/* Convert tree into Verilog source code: */
+		ast_convert(roots);
 
 		fclose(yyin);
-		printf("Done.\n\nPress enter to exit");
+		printf("\nDone.\n\nPress enter to exit");
 	} else {
 		cout << "Usage: veriloc [filename]\n";
 		return 1;

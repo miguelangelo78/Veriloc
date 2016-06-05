@@ -4,14 +4,6 @@
 #include <vector>
 #include <stdio.h>
 
-/* Stack protection: */
-#include <string.h>
-#define _ALLOCS_ "__ALLOC__"
-#define _ALLOCA_ strcpy(_i_, _ALLOCS_)
-#define _ALLOCPI_ if(strcmp(_i_, _ALLOCS_)) return 0;
-#define _ALLOCPE_ return 1
-#define _ALLOCV_ char _i_[10]
-
 void ast_init();
 void ast_dump();
 
@@ -75,16 +67,7 @@ class argument_expression_list;
 class unary_expression;
 class unary_operator;
 class cast_expression;
-class multiplicative_expression;
-class additive_expression;
-class shift_expression;
-class relational_expression;
-class equality_expression;
-class and_expression;
-class exclusive_or_expression;
-class inclusive_or_expression;
-class logical_and_expression;
-class logical_or_expression;
+class arith_logic_expression;
 class conditional_expression;
 class assignment_expression;
 class assignment_operator;
@@ -97,6 +80,7 @@ class block_item_list;
 class block_item;
 class expression_statement;
 class selection_statement;
+class selection_statement_list;
 class iteration_statement;
 class jump_statement;
 class always_statement;
@@ -234,18 +218,14 @@ public:
 class pointer {
 public:
 	pointer * ptr;
-	_ALLOCV_;
 	std::vector<type_qualifier_list*> type_qual_list;
 
-	char add(type_qualifier_list * type_qual_list, pointer * ptr) {
-		_ALLOCPI_;
+	void add(type_qualifier_list * type_qual_list, pointer * ptr) {
 		if(type_qual_list) this->type_qual_list.push_back(type_qual_list);
 		if(ptr) this->ptr = ptr;
-		_ALLOCPE_;
 	}
 
 	pointer(type_qualifier_list * type_qual_list, pointer * ptr) {
-		_ALLOCA_;
 		add(type_qual_list, ptr);
 	}
 };
@@ -602,16 +582,12 @@ class specifier_qualifier_list {
 public:
 	std::vector<type_specifier*> type_spec;
 	std::vector<type_qualifier*> type_qualif;
-	_ALLOCV_;
 
-	char add(type_specifier * type_spec, type_qualifier * type_qualif) {
-		_ALLOCPI_;
+	void add(type_specifier * type_spec, type_qualifier * type_qualif) {
 		if(type_spec) this->type_spec.push_back(type_spec);
 		if(type_qualif) this->type_qualif.push_back(type_qualif);
-		_ALLOCPE_;
 	}
 	specifier_qualifier_list(type_specifier * type_spec, type_qualifier * type_qualif) {
-		_ALLOCA_;
 		add(type_spec, type_qualif);
 	}
 };
@@ -748,9 +724,7 @@ public:
 	std::vector<alignment_specifier*> align_spec;
 	std::vector<char> * arr;
 
-	_ALLOCV_;
-
-	char add(
+	void add(
 		storage_class_specifier * stor_class_spec,
 		type_specifier * type_spec,
 		type_qualifier * type_qualif,
@@ -758,13 +732,11 @@ public:
 		alignment_specifier * align_spec
 	)
 	{
-		_ALLOCPI_;
 		if(stor_class_spec)	this->stor_class_spec.push_back(stor_class_spec);
 		if(type_spec) this->type_spec.push_back(type_spec);
 		if(type_qualif) this->type_qualif.push_back(type_qualif);
 		if(func_spec) this->func_spec.push_back(func_spec);
 		if(align_spec) this->align_spec.push_back(align_spec);
-		_ALLOCPE_;
 	}
 
 	declaration_specifiers(
@@ -774,7 +746,6 @@ public:
 		function_specifier * func_spec,
 		alignment_specifier * align_spec
 	) {
-		_ALLOCA_;
 		add(stor_class_spec, type_spec, type_qualif, func_spec, align_spec);
 	}
 };
@@ -818,6 +789,7 @@ public:
 	char * id;
 	type_name * t_name;
 	initializer_list * init_list;
+	char is_func;
 
 	void add(
 		expression * expr,
@@ -827,7 +799,8 @@ public:
 		constant_expression * expr4,
 		argument_expression_list * arg_expr_list,
 		unsigned int op,
-		char * id
+		char * id,
+		char is_func
 	) {
 		this->expr1 = expr1;
 		this->expr2 = expr2;
@@ -836,6 +809,7 @@ public:
 		this->arg_expr_list = arg_expr_list;
 		this->op = op;
 		this->id = id;
+		this->is_func = is_func;
 	}
 
 	postfix_expression(
@@ -844,7 +818,7 @@ public:
 		initializer_list * init_list
 	)
 	: expr(0), expr1(0), expr2(0), expr3(0), expr4(0),
-		arg_expr_list(0), op(0), id(0)
+		arg_expr_list(0), op(0), id(0), is_func(0)
 	{
 		this->prim_expr = prim_expr;
 		this->t_name = t_name;
@@ -868,32 +842,29 @@ public:
 class unary_expression {
 public:
 	postfix_expression * post_expr;
-	std::vector<unsigned int> op;
+	std::vector<unsigned int> inc_dec_op;
 	unary_operator * un_op;
 	cast_expression * cast_expr;
 	std::vector<unsigned int> sizeof_op;
 	type_name * t_name;
 	unsigned int alignof_op;
-	_ALLOCV_;
 
-	char add(
+	void add(
 		postfix_expression * post_expr,
-		unsigned int op,
+		unsigned int inc_dec_op,
 		unary_operator * un_op,
 		cast_expression * cast_expr,
 		unsigned int sizeof_op,
 		type_name * t_name,
 		unsigned int alignof_op
 	) {
-		_ALLOCPI_;
 		if(post_expr) this->post_expr = post_expr;
-		if(op) this->op.push_back(op);
+		if(inc_dec_op) this->inc_dec_op.push_back(inc_dec_op);
 		if(un_op) this->un_op = un_op;
 		if(cast_expr) this->cast_expr = cast_expr;
 		if(sizeof_op) this->sizeof_op.push_back(sizeof_op);
 		if(t_name) this->t_name = t_name;
 		if(alignof_op) this->alignof_op = alignof_op;
-		_ALLOCPE_;
 	}
 
 	unary_expression(
@@ -905,7 +876,6 @@ public:
 		type_name * t_name,
 		unsigned int alignof_op
 	) {
-		_ALLOCA_;
 		add(post_expr, op, un_op, cast_expr, sizeof_op, t_name, alignof_op);
 	}
 };
@@ -926,162 +896,41 @@ public:
 	: un_expr(un_expr), t_name(t_name), cast_expr(cast_expr) { }
 };
 
-class multiplicative_expression {
+class arith_logic_expression {
 public:
-	std::vector<cast_expression *> expr;
+	std::vector<arith_logic_expression *> math_expr;
+	std::vector<cast_expression *> cast_expr;
 	std::vector<unsigned int> op;
 
-	void add(cast_expression * expr, unsigned int op) {
-		if(expr) this->expr.push_back(expr);
+	void add(arith_logic_expression * math_expr, unsigned int op) {
+		if(math_expr) this->math_expr.push_back(math_expr);
 		if(op) this->op.push_back(op);
 	}
-	multiplicative_expression(cast_expression * expr, unsigned int op) {
-		add(expr, op);
-	}
-};
-
-class additive_expression {
-public:
-	std::vector<multiplicative_expression *> expr;
-	std::vector<unsigned int> op;
-
-	void add(multiplicative_expression * expr, unsigned int op) {
-		if(expr) this->expr.push_back(expr);
+	void add(cast_expression * cast_expr, unsigned int op) {
+		if(cast_expr) this->cast_expr.push_back(cast_expr);
 		if(op) this->op.push_back(op);
 	}
-	additive_expression(multiplicative_expression * expr, unsigned int op) {
-		add(expr, op);
-	}
-};
 
-class shift_expression {
-public:
-	std::vector<additive_expression *> expr;
-	std::vector<unsigned int> op;
-
-	void add(additive_expression * expr, unsigned int op) {
-		if(expr) this->expr.push_back(expr);
-		if(op) this->op.push_back(op);
+	arith_logic_expression(arith_logic_expression * math_expr, unsigned int op) {
+		add(math_expr, op);
 	}
-	shift_expression(additive_expression * expr, unsigned int op) {
-		add(expr, op);
-	}
-};
-
-class relational_expression {
-public:
-	std::vector<shift_expression *> expr;
-	std::vector<unsigned int> op;
-
-	void add(shift_expression * expr, unsigned int op) {
-		if(expr) this->expr.push_back(expr);
-		if(op) this->op.push_back(op);
-	}
-	relational_expression(shift_expression * expr, unsigned int op) {
-		add(expr, op);
-	}
-};
-
-class equality_expression {
-public:
-	std::vector<relational_expression *> expr;
-	std::vector<unsigned int> op;
-
-	void add(relational_expression * expr, unsigned int op) {
-		if(expr) this->expr.push_back(expr);
-		if(op) this->op.push_back(op);
-	}
-	equality_expression(relational_expression * expr, unsigned int op) {
-		add(expr, op);
-	}
-};
-
-class and_expression {
-public:
-	std::vector<equality_expression *> expr;
-	std::vector<unsigned int> op;
-
-	void add(equality_expression * expr, unsigned int op) {
-		if(expr) this->expr.push_back(expr);
-		if(op) this->op.push_back(op);
-	}
-	and_expression(equality_expression * expr, unsigned int op) {
-		add(expr, op);
-	}
-};
-
-class exclusive_or_expression {
-public:
-	std::vector<and_expression *> expr;
-	std::vector<unsigned int> op;
-
-	void add(and_expression * expr, unsigned int op) {
-		if(expr) this->expr.push_back(expr);
-		if(op) this->op.push_back(op);
-	}
-	exclusive_or_expression(and_expression * expr, unsigned int op) {
-		add(expr, op);
-	}
-};
-
-class inclusive_or_expression {
-public:
-	std::vector<exclusive_or_expression *> expr;
-	std::vector<unsigned int> op;
-
-	void add(exclusive_or_expression * expr, unsigned int op) {
-		if(expr) this->expr.push_back(expr);
-		if(op) this->op.push_back(op);
-	}
-	inclusive_or_expression(exclusive_or_expression * expr, unsigned int op) {
-		add(expr, op);
-	}
-};
-
-class logical_and_expression {
-public:
-	std::vector<inclusive_or_expression *> expr;
-	std::vector<unsigned int> op;
-
-	void add(inclusive_or_expression * expr, unsigned int op) {
-		if(expr) this->expr.push_back(expr);
-		if(op) this->op.push_back(op);
-	}
-	logical_and_expression(inclusive_or_expression * expr, unsigned int op) {
-		add(expr, op);
-	}
-};
-
-class logical_or_expression {
-public:
-	std::vector<logical_and_expression *> expr;
-	std::vector<unsigned int> op;
-
-	void add(logical_and_expression * expr, unsigned int op) {
-		if(expr) this->expr.push_back(expr);
-		if(op) this->op.push_back(op);
-	}
-	logical_or_expression(logical_and_expression * expr, unsigned int op) {
-		add(expr, op);
+	arith_logic_expression(cast_expression * cast_expr, unsigned int op)
+	: math_expr(0) {
+		add(cast_expr, op);
 	}
 };
 
 class conditional_expression {
 public:
-	std::vector<logical_or_expression *> logical_expr;
+	std::vector<arith_logic_expression *> math_expr;
 	std::vector<expression*> expr;
 
-	_ALLOCV_;
-
-	char add(logical_or_expression * logical_expr, expression * expr) {
-		_ALLOCPI_;
-		if(logical_expr) this->logical_expr.push_back(logical_expr);
+	void add(arith_logic_expression * math_expr, expression * expr) {
+		if(math_expr) this->math_expr.push_back(math_expr);
 		if(expr) this->expr.push_back(expr);
-		_ALLOCPE_;
 	}
-	conditional_expression(logical_or_expression * logical_expr, expression * expr) {
-		_ALLOCA_;
-		add(logical_expr, expr);
+	conditional_expression(arith_logic_expression * math_expr, expression * expr) {
+		add(math_expr, expr);
 	}
 };
 
@@ -1090,19 +939,16 @@ public:
 	conditional_expression * cond_expr;
 	std::vector<unary_expression *> un_expr;
 	std::vector<assignment_operator *> assign_op;
-	_ALLOCV_;
 
-	char add(
+	void add(
 		conditional_expression * cond_expr,
 		unary_expression * un_expr,
 		assignment_operator * assign_op
 	)
 	{
-		_ALLOCPI_;
 		if(cond_expr) this->cond_expr = cond_expr;
 		if(un_expr) this->un_expr.push_back(un_expr);
 		if(assign_op) this->assign_op.push_back(assign_op);
-		_ALLOCPE_;
 	}
 
 	assignment_expression(
@@ -1111,7 +957,6 @@ public:
 		assignment_operator * assign_op
 	)
 	{
-		_ALLOCA_;
 		add(cond_expr, un_expr, assign_op);
 	}
 };
@@ -1147,13 +992,15 @@ public:
 	float f_constant;
 	int i_constant;
 	char * enum_constant;
+	char which;
 
 	constant(
 		int i_constant,
 		float f_constant,
-		char * enum_constant
+		char * enum_constant,
+		char which
 	)
-	: f_constant(f_constant), i_constant(i_constant), enum_constant(enum_constant) { }
+	: f_constant(f_constant), i_constant(i_constant), enum_constant(enum_constant), which(which) { }
 };
 
 class enumeration_constant {
@@ -1243,21 +1090,37 @@ public:
 	: expr(expr) { }
 };
 
+class selection_statement_list {
+public:
+	std::vector<expression*> expr_list;
+	std::vector<statement*> stat_list;
+
+	void add(expression* expr, statement * stat) {
+		if(expr) this->expr_list.push_back(expr);
+		if(stat) this->stat_list.push_back(stat);
+	}
+
+	selection_statement_list(expression* expr, statement * stat) {
+		add(expr, stat);
+	}
+};
+
 class selection_statement {
 public:
 	char is_switch;
 	expression * expr1, * expr2;
-	statement * stat1, * stat2, * stat3;
+	statement * stat1, * stat2;
+	selection_statement_list * sellist;
 	selection_statement(
 		char is_switch,
 		expression * expr1,
 		expression * expr2,
 		statement * stat1,
 		statement * stat2,
-		statement * stat3
+		selection_statement_list * sellist
 	)
 	: is_switch(is_switch), expr1(expr1), expr2(expr2),
-	  stat1(stat1), stat2(stat2), stat3(stat3) {}
+	  stat1(stat1), stat2(stat2), sellist(sellist) {}
 };
 
 class iteration_statement {
@@ -1283,11 +1146,11 @@ public:
 
 class jump_statement {
 public:
-	char * keyword;
+	char jump_type;
 	char * id;
 	expression * expr;
-	jump_statement(char * keyword, char * id, expression * expr)
-	: keyword(keyword), id(id), expr(expr) {}
+	jump_statement(char jump_type, char * id, expression * expr)
+	: jump_type(jump_type), id(id), expr(expr) {}
 };
 
 class always_statement {

@@ -1,39 +1,32 @@
 module Mymodule {
 	public:
 		// The ports of the module: */
-		reg  input a, b = (10+1)*2, c, d[7:0;8:0];
+		reg input a, b = (1+2 * (1 / (1+2 + (a)))), c, d[8:0;5:0];
 		wire output q;
-		reg input data[7:0] = -8hu1x0zZ020FA; // Test literals */
+		reg data[7:0] = -8hu1x0zZ020FA; // Test literals */
 		char a = -1;
 
 		// Constructor: */
 		Mymodule() {
-			myvar = 0;
-			q = a && b && c;
-		}
-
-		// Constructor overloading: */
-		Mymodule(char operation) {
-			switch(operation) {
-			case '0':
-				q = a && b && c; break;
-			case '1':
-				q = a || b || c; break;
-			default:
-				q = 0;
-			}
+			myvar = ((q == 1) ? 2 : ((b == 1) ? 10 : -1 ));
+			q = c && b && c;
 		}
 
 		int add(char c) {
-			char q1 = q+1;
-			q += c;
+			char q1 = q*1;
+			q /= c;
 			if(q >= 10 && q1<10)
-				q = 0 + 10 * 10;
+				q = 0 - 10 * 10;
 		}
 
 		// Sensitivity list: */
-		always(a, negedge b,c, posedge clock) {
-			add(c);
+		always(a, b,c, posedge clock) {
+
+		}
+
+		always() {
+			i = i+1;
+			add(2,0x10,a+b,a+1);
 		}
 
 	private:
@@ -57,7 +50,7 @@ testbench Test {
 			LABEL: run();
 		elsif(mod.b==2) {
 			// Do nothingss
-		}else if(mod.c==3)
+		} else if(mod.c==3)
 			run_again();
 	}
 };

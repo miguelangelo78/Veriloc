@@ -43,7 +43,7 @@ $(OBJ)/ast.o: $(SRC)/ast.cpp
 	$(CXX) -o $@ -c $^ $(CPPFLAGS)
 
 $(OBJ)/ast_to_verilog.o: $(SRC)/ast_to_verilog.cpp
-	$(CXX) -o $@ -c $^ $(CPPFLAGS)
+	$(CXX) -o $@ -c $^ -std=c++11 $(CPPFLAGS)
 
 all: $(OBJS)
 	$(CXX) -o $(BIN)/$(EXEC) $^ $(CPPFLAGS)
