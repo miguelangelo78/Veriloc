@@ -27,6 +27,7 @@ module Mymodule {
 		always() {
 			i = i+1*(1+2);
 			add(2,0x10,a+b,a+1);
+			a <= ~1;
 		}
 
 	private:
@@ -41,7 +42,7 @@ testbench Test {
 
 	Test() {
 		#100;
-		a <= 1+(~(1==1?!b:(2==2)?0x100:10h200xzXZ));
+		a <= ~1;
 	}
 
 	// Sensivity list: */

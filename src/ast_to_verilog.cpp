@@ -110,7 +110,7 @@ string operator_to_str(unsigned int op) {
 	string str = "";
 	switch(op) {
 	case '!': str = "!"; break;
-	case '~': str =  "~"; break;
+	case '~': str = "~"; break;
 	case '#': str = "#"; break;
 	case '=': str = "="; break;
 	case '*': str ="*"; break;
@@ -225,16 +225,18 @@ string const_expr_to_str(arith_logic_expression * expr) {
 				if(cast_expr->un_expr && cast_expr->un_expr->post_expr) {
 					postfix_expression * post_expr = cast_expr->un_expr->post_expr;
 					/* Look for function calls: */
-					if(post_expr->arg_expr_list) {
-						/* We found a function call with arguments */
-						str_tmp += "(";
-						int ctr = 0;
-						for(auto aexpr : post_expr->arg_expr_list->assign_expr)
-							str_tmp += const_expr_to_str(aexpr->cond_expr) + (ctr++<post_expr->arg_expr_list->assign_expr.size()-1 ? ", " : "");
-						str_tmp += ")";
-					} else if(post_expr->is_func) {
-						/* We found a function call without arguments */
-						str_tmp += "()";
+					if(post_expr->is_func) {
+						if(post_expr->arg_expr_list) {
+							/* We found a function call with arguments */
+							str_tmp += "(";
+							int ctr = 0;
+							for(auto aexpr : post_expr->arg_expr_list->assign_expr)
+								str_tmp += const_expr_to_str(aexpr->cond_expr) + (ctr++<post_expr->arg_expr_list->assign_expr.size()-1 ? ", " : "");
+							str_tmp += ")";
+						} else {
+							/* We found a function call without arguments */
+							str_tmp += "()";
+						}
 					}
 				}
 
@@ -292,6 +294,17 @@ string ast_var_decl(root * mod) {
 	return str;
 }
 
+string ast_assign_outputs_step2(init_declarator * id) {
+	string str = "";
+	/* Fetch variable id: */
+	str += string("assign ") + std::string(id->decl->direct_decl->id) + string(" = ");
+	/* Fetch expression: */
+	str += const_expr_to_str(id->init->assign_exp->cond_expr).c_str();
+	/* Terminate line: */
+	str += ";\n";
+	return str;
+}
+
 string ast_assign_outputs(root * mod, char use_constructor) {
 	string str = "";
 	char is_assign_empty = 1;
@@ -334,21 +347,32 @@ string ast_assign_outputs(root * mod, char use_constructor) {
 	for(auto ext : mod->t_unit_ctx->ext_decl) {
 		if(ext->var_def) {
 			declaration * var = ext->var_def;
-			for(auto type : var->decl_spec->type_spec)
-				if(type->type == REG || type->type == WIRE) {
-					for(auto id : var->init_decl_list->init_decl) {
-						if(!id->init) continue;
-						if(is_assign_empty)
-							str += "/**** Assignments: ****/\n";
-						is_assign_empty = 0;
-						/* Fetch variable id: */
-						str += string("assign ") + std::string(id->decl->direct_decl->id) + string(" = ");
-						/* Fetch expression: */
-						str += const_expr_to_str(id->init->assign_exp->cond_expr).c_str();
-						/* Terminate line: */
-						str += ";\n";
+			/* If we have a type specifier: */
+			if(var->decl_spec->type_spec.size() > 0) {
+				for(auto type : var->decl_spec->type_spec)
+					if(type->type == REG || type->type == WIRE) {
+						for(auto id : var->init_decl_list->init_decl) {
+							if(!id->init) continue;
+							if(is_assign_empty)
+								str += "/**** Assignments: ****/\n";
+							is_assign_empty = 0;
+							str += ast_assign_outputs_step2(id);
+						}
+					}
+			} /* If we don't have a type specifier: */
+			else if(var->decl_spec->type_qualif.size() > 0) {
+				for(auto qualif : var->decl_spec->type_qualif) {
+					if(qualif->qualifier == INPUT || qualif->qualifier == OUTPUT || qualif->qualifier == INOUT) {
+						for(auto id : var->init_decl_list->init_decl) {
+							if(!id->init) continue;
+							if(is_assign_empty)
+								str += "/**** Assignments: ****/\n";
+							is_assign_empty = 0;
+							str += ast_assign_outputs_step2(id);
+						}
 					}
 				}
+			}
 		}
 	}
 
@@ -376,7 +400,7 @@ string ast_sel_stat(selection_statement * sel, unsigned int idl) {
 		str += iden(idl) + "endcase\n";
 	} else {
 		/* If statement: */
-		str += iden(idl) + string("if(") + const_expr_to_str(sel->expr1->assign_expr[0]->cond_expr) + ")\n"+iden(idl)+"begin\n";
+		str += iden(idl) + string("if(") + ast_expr_stat(sel->expr1, 0, 0) + ")\n"+iden(idl)+"begin\n";
 
 		/* Statement 1: */
 		if(sel->stat1)

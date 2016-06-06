@@ -877,7 +877,8 @@ public:
 		unsigned int sizeof_op,
 		type_name * t_name,
 		unsigned int alignof_op
-	) {
+	)
+	: post_expr(0), inc_dec_op(0), un_op(0), cast_expr(0), sizeof_op(0), t_name(0), alignof_op(0) {
 		add(post_expr, op, un_op, cast_expr, sizeof_op, t_name, alignof_op);
 	}
 };
