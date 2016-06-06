@@ -7,6 +7,7 @@
 #include <headers.h>
 #include <ast_to_verilog.h>
 
+/* Elsif statement: */
 string ast_sel_list_stat(selection_statement_list * sellist, unsigned int idl) {
 	string str = "";
 	int ctr = 0;
@@ -17,6 +18,7 @@ string ast_sel_list_stat(selection_statement_list * sellist, unsigned int idl) {
 	return str;
 }
 
+/* If/Else/Switch statement: */
 string ast_sel_stat(selection_statement * sel, unsigned int idl) {
 	string str = "";
 	if(sel->is_switch) {
@@ -45,6 +47,7 @@ string ast_sel_stat(selection_statement * sel, unsigned int idl) {
 	return str;
 }
 
+/* For, While, Do While statement: */
 string ast_loop_stat(iteration_statement * it, unsigned int idl) {
 	string str = "";
 	char ignore_statement = 0;
@@ -92,6 +95,7 @@ string ast_loop_stat(iteration_statement * it, unsigned int idl) {
 	return str + (!ignore_statement ? iden(idl) + "end\n" : "");
 }
 
+/* Jump statement: */
 string ast_jump_stat(jump_statement * jmp, unsigned int idl) {
 	string str = "";
 	switch(jmp->jump_type) {
@@ -109,6 +113,7 @@ string ast_jump_stat(jump_statement * jmp, unsigned int idl) {
 	return str;
 }
 
+/* Compount statement: */
 string ast_compound_stat(compound_statement * comp, unsigned int idl) {
 	string str = "";
 	if(!comp->b_item_list) return str;
@@ -118,6 +123,7 @@ string ast_compound_stat(compound_statement * comp, unsigned int idl) {
 	return str;
 }
 
+/* Expression statement: */
 string ast_expr_stat(expression * expr, char terminate, unsigned int idl) {
 	string str = "";
 	if(expr->assign_expr.size() > 0) {
@@ -133,6 +139,7 @@ string ast_expr_stat(expression * expr, char terminate, unsigned int idl) {
 	return str;
 }
 
+/* Label statement: */
 string ast_label_stat(labeled_statement * label, unsigned int idl) {
 	string str = "";
 	if(label->id) {
@@ -148,10 +155,12 @@ string ast_label_stat(labeled_statement * label, unsigned int idl) {
 	return str;
 }
 
+/* Delay statement (Verilog only): */
 string ast_delay_stat(delay_statement * delay_stat, unsigned int idl) {
 	return iden(idl) + delay_stat->delay_val + ";\n";
 }
 
+/* Sensitivity list for the always statement (Verilog only): */
 string always_sensitivity_list(always_statement * statement) {
 	if(!statement->id_list) return "*"; /* Empty sensitivity list */
 	string str = "";
@@ -171,6 +180,7 @@ string always_sensitivity_list(always_statement * statement) {
 	return str;
 }
 
+/* Always statement (Verilog only): */
 string ast_always_stat(always_statement * always_stat, unsigned int idl) {
 	string str = "";
 	str += iden(idl)+"always @(" + always_sensitivity_list(always_stat) +
@@ -180,6 +190,7 @@ string ast_always_stat(always_statement * always_stat, unsigned int idl) {
 	return str;
 }
 
+/* Always statement (Verilog only and called by root): */
 string ast_always_stat(root * mod) {
 	string str = "";
 	char always_stat_found = 0;
@@ -196,6 +207,7 @@ string ast_always_stat(root * mod) {
 	return str;
 }
 
+/* Initial statement (Verilog and testbench only) */
 string ast_initial_stat(root * mod) {
 	string str = "";
 	for(auto ext_decl : mod->t_unit_ctx->ext_decl)
@@ -206,6 +218,7 @@ string ast_initial_stat(root * mod) {
 	return str;
 }
 
+/* General statement allows us to cascade statements over and over: */
 string general_statement_to_str(statement * st, unsigned int idl_carry) {
 	if(st->always_stat) return ast_always_stat(st->always_stat, idl_carry+1);
 	if(st->delay_stat) return ast_delay_stat(st->delay_stat, idl_carry+1);
