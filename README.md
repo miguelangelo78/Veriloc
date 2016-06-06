@@ -145,6 +145,10 @@ private:
 ```verilog
 module RAM8x8(input clk, cs, we, oe, input [7:0] address, inout [7:0] data);
 
+reg [7:0] data_out;
+reg [7:0] memory[7:0];
+reg oe_r;
+	
 assign data = (cs && oe && !we) ? data_out : 8'bz;
 
 always @(posedge clk)
