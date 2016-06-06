@@ -71,7 +71,7 @@
 					<folderInfo id="0.679028151.1113037449.2050958710." name="/" resourcePath="">
 						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.1253903688" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.GNU_ELF" id="org.eclipse.cdt.build.core.prefbase.toolchain.1253903688.664389148" name=""/>
-							<builder arguments="${workspace_loc:/Veriloc}/testbench/run_test.pyc test1" command="python" id="org.eclipse.cdt.build.core.settings.default.builder.819729366" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<builder arguments="${workspace_loc:/Veriloc}/testbench/run_test.pyc test1.vc" command="python" id="org.eclipse.cdt.build.core.settings.default.builder.819729366" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
 							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.872938138" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
 							<tool id="org.eclipse.cdt.build.core.settings.holder.405316564" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1560949249" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
@@ -80,7 +80,7 @@
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.222375939" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
 							<tool id="org.eclipse.cdt.build.core.settings.holder.1373268841" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
-								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.1541782853" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.1541782853" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;C:\MinGW\lib\gcc\mingw32\4.6.1\include\c++&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\MinGW\lib\gcc\mingw32\4.6.1\include\c++\mingw32&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;../:\MinGW\lib\gcc\mingw32\4.8.1\include\c++\backward&quot;"/>
@@ -113,7 +113,7 @@
 					<folderInfo id="0.679028151.1113037449.1877346394." name="/" resourcePath="">
 						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.1865062910" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.GNU_ELF" id="org.eclipse.cdt.build.core.prefbase.toolchain.1865062910.85912200" name=""/>
-							<builder arguments="${workspace_loc:/Veriloc}/testbench/run_test.pyc test2.txt" command="python" id="org.eclipse.cdt.build.core.settings.default.builder.1726354771" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<builder arguments="${workspace_loc:/Veriloc}/testbench/run_test.pyc test2.vc" command="python" id="org.eclipse.cdt.build.core.settings.default.builder.1726354771" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
 							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.446087147" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
 							<tool id="org.eclipse.cdt.build.core.settings.holder.1374905700" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1211461290" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
@@ -122,7 +122,7 @@
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1160505942" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
 							<tool id="org.eclipse.cdt.build.core.settings.holder.1535614361" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
-								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.60429179" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.60429179" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;C:\MinGW\lib\gcc\mingw32\4.6.1\include\c++&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\MinGW\lib\gcc\mingw32\4.6.1\include\c++\mingw32&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;../:\MinGW\lib\gcc\mingw32\4.8.1\include\c++\backward&quot;"/>
