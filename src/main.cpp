@@ -2,6 +2,8 @@
 #include <map>
 #include <ast_to_verilog.h>
 
+extern int yyparse();
+
 #define DEBUG 0
 
 map<string, int> sym_table;
