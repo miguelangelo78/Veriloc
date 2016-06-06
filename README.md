@@ -181,7 +181,7 @@ endmodule
 module ROM {
 public:
 	input address[3:0];
-	output data[7:0];
+	output reg data[7:0];
 	input read_en, cs;
 	
 	always(cs, read_en, address) {
@@ -208,7 +208,7 @@ public:
 ```
 **Verilog** output:
 ```verilog
-module ROM(input [3:0] address, output [7:0] data, input read_en, cs);
+module ROM(input [3:0] address, output reg [7:0] data, input read_en, cs);
 
 always @(cs or read_en or address)
 begin
