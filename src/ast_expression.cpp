@@ -9,7 +9,7 @@
 
 string postfix_to_str(postfix_expression * post) {
 	string str = "";
-	if(post->prim_expr) str += constant_to_string(post->prim_expr);
+	if(post->prim_expr) str += primary_expression_to_str(post->prim_expr);
 	if(post->expr) str += "[" + ast_expr_stat(post->expr, 0, 0) + "]";
 	if(post->expr1) str += "[" + const_expr_to_str(post->expr1->cond_expr) + ":" +  const_expr_to_str(post->expr2->cond_expr) + "]";
 	return str;
@@ -73,7 +73,7 @@ string const_expr_to_str(arith_logic_expression * expr) {
 		/* This is a point where recursion ends.
 		 * This happens when we reach the end of the branch AND an operator WAS FOUND, most likely multiplication */
 		for(auto cast_expr : expr->cast_expr)
-			str += constant_to_string(cast_expr->un_expr->post_expr->prim_expr) + (i<expr->op.size()? " " + operator_to_str(expr->op[i++]) + " " : "");
+			str += primary_expression_to_str(cast_expr->un_expr->post_expr->prim_expr) + (i<expr->op.size()? " " + operator_to_str(expr->op[i++]) + " " : "");
 	} else { /* Or is it anything else? */
 		for(auto math_expr : expr->math_expr) /* Recursion through all new-found branches */
 			str += const_expr_to_str(math_expr) + (i < expr->op.size() ? " " + operator_to_str(expr->op[i++]) + " " : "");
@@ -158,7 +158,7 @@ string qualifier_to_str(unsigned int qualif) {
 	}
 }
 
-string constant_to_string(primary_expression * prim_expr) {
+string primary_expression_to_str(primary_expression * prim_expr) {
 	if(prim_expr->id) return prim_expr->id;
 	else {
 		if(prim_expr->con)
@@ -182,9 +182,7 @@ string constant_to_string(primary_expression * prim_expr) {
 			}
 			default: return "";
 			}
-		else {
-			/* Put expression inside braces: */
+		else /* Put expression inside braces: */
 			return "(" + ast_expr_stat(prim_expr->expr, 0, 0) + ")";
-		}
 	}
 }

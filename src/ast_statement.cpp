@@ -7,14 +7,13 @@
 #include <headers.h>
 #include <ast_to_verilog.h>
 
-/******** Construct statements: ********/
-
 string ast_sel_list_stat(selection_statement_list * sellist, unsigned int idl) {
 	string str = "";
 	int ctr = 0;
 	for(auto expr : sellist->expr_list)
-		str += iden(idl) + "else if(" + const_expr_to_str(expr->assign_expr[0]->cond_expr) + ")\n"+iden(idl)+"begin\n"+general_statement_to_str(sellist->stat_list[ctr++], idl)
-		+ (ctr<sellist->expr_list.size()-1 ? iden(idl) + "end\n":"");
+		str += iden(idl) + "else if(" + const_expr_to_str(expr->assign_expr[0]->cond_expr) + ")\n"
+		+ iden(idl)+"begin\n"+general_statement_to_str(sellist->stat_list[ctr++], idl)
+		+ (ctr < sellist->expr_list.size()-1 ? iden(idl) + "end\n":"");
 	return str;
 }
 
@@ -27,7 +26,7 @@ string ast_sel_stat(selection_statement * sel, unsigned int idl) {
 		str += iden(idl) + "endcase\n";
 	} else {
 		/* If statement: */
-		str += iden(idl) + string("if(") + ast_expr_stat(sel->expr1, 0, 0) + ")\n"+iden(idl)+"begin\n";
+		str += iden(idl) + string("if(") + ast_expr_stat(sel->expr1, 0, 0) + ")\n" + iden(idl) + "begin\n";
 
 		/* Statement 1: */
 		if(sel->stat1)
@@ -52,11 +51,12 @@ string ast_loop_stat(iteration_statement * it, unsigned int idl) {
 
 	switch(it->loop_type) {
 	case 0: /* While */
-		str += iden(idl) + "while(" + ast_expr_stat(it->expr, 0, 0) + ")\n"+iden(idl)+"begin\n";
+		str += iden(idl) + "while(" + ast_expr_stat(it->expr, 0, 0) + ")\n" + iden(idl) + "begin\n";
 		break;
 	case 1: /* Do While */
 		ignore_statement = 1;
-		str += iden(idl) + "do\n"+iden(idl)+"begin\n" + general_statement_to_str(it->stat, idl) + iden(idl)+"end\n"+iden(idl)+"while(" + ast_expr_stat(it->expr, 0, 0) + ");\n";
+		str += iden(idl) + "do\n" + iden(idl)+"begin\n" + general_statement_to_str(it->stat, idl)
+				+ iden(idl)+"end\n" + iden(idl)+"while(" + ast_expr_stat(it->expr, 0, 0) + ");\n";
 		break;
 	case 2: /* For */
 		str += iden(idl) + "for(";
@@ -68,7 +68,8 @@ string ast_loop_stat(iteration_statement * it, unsigned int idl) {
 				string initialization = "";
 				if(decl->init)
 					initialization += " = " + const_expr_to_str(decl->init->assign_exp->cond_expr);
-				str += string(decl->decl->direct_decl->id) + initialization + (ctr++ < it->decl->init_decl_list->init_decl.size() - 1 ? ", " : "");
+				str += string(decl->decl->direct_decl->id) + initialization
+						+ (ctr++ < it->decl->init_decl_list->init_decl.size() - 1 ? ", " : "");
 			}
 		}
 		str += ";";
@@ -148,7 +149,7 @@ string ast_label_stat(labeled_statement * label, unsigned int idl) {
 }
 
 string ast_delay_stat(delay_statement * delay_stat, unsigned int idl) {
-	return iden(idl) + delay_stat->delay_val+";\n";
+	return iden(idl) + delay_stat->delay_val + ";\n";
 }
 
 string always_sensitivity_list(always_statement * statement) {
@@ -163,7 +164,7 @@ string always_sensitivity_list(always_statement * statement) {
 			}
 		}
 		else { /* There is no qualifier */
-			str += statement->id_list->id[i] + (i<statement->id_list->type_qual.size()-1 ? string(" or ") : "");
+			str += statement->id_list->id[i] + (i < statement->id_list->type_qual.size() - 1 ? string(" or ") : "");
 		}
 		i++;
 	}
@@ -198,9 +199,10 @@ string ast_always_stat(root * mod) {
 string ast_initial_stat(root * mod) {
 	string str = "";
 	for(auto ext_decl : mod->t_unit_ctx->ext_decl)
-		if(ext_decl->func_def && ext_decl->func_def->direct_decl && ext_decl->func_def->comp_statement->b_item_list)
+		if(ext_decl->func_def && ext_decl->func_def->direct_decl && ext_decl->func_def->comp_statement->b_item_list) {
 			/* Found constructor */
 			str += "\ninitial\nbegin\n" + ast_compound_stat(ext_decl->func_def->comp_statement,0) + "end\n";
+		}
 	return str;
 }
 
@@ -215,5 +217,3 @@ string general_statement_to_str(statement * st, unsigned int idl_carry) {
 	if(st->jmp_stat) return ast_jump_stat(st->jmp_stat, idl_carry+1);
 	return "";
 }
-
-

@@ -49,7 +49,7 @@ void ast_dump_sensitivity(always_statement * always_stat) {
 }
 
 void ast_dump() {
-	printf("Dumping AST...\n\nRoots: %d\n", roots.size());
+	printf("Dumping AST...\n\nRoots: %d\n", (int)roots.size());
 	for(int i=0;i<roots.size();i++) {
 		root * r = roots[i];
 		printf("%d> %s %s\n", i+1,
@@ -57,7 +57,7 @@ void ast_dump() {
 		if(r->t_unit_ctx) {
 			translation_unit_context * t_unit = r->t_unit_ctx;
 
-			printf("\tDeclaration count: %d\n******\n", t_unit->ext_decl.size());
+			printf("\tDeclaration count: %d\n******\n", (int)t_unit->ext_decl.size());
 			for(int j=0;j<t_unit->ext_decl.size();j++) {
 				external_declaration_internal * ext = t_unit->ext_decl[j];
 				ast_dump_function(ext->func_def);

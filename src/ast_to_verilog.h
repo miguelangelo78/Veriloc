@@ -28,28 +28,35 @@ extern string const_expr_to_str(conditional_expression * condexpr);
 extern string operator_to_str(unsigned int op);
 extern string type_to_str(unsigned int typespec);
 extern string qualifier_to_str(unsigned int qualif);
-extern string constant_to_string(primary_expression * prim_expr);
+extern string primary_expression_to_str(primary_expression * prim_expr);
+
+/* Declarations (functions, variables, ports and assignments): */
+extern string ast_func_decl(root * mod);
+extern string ast_var_decl(root * mod);
+extern string ast_module_argslist(root * mod);
+extern string ast_assign_outputs_step2(init_declarator * id);
+extern string assign_outputs(root * mod, char use_constructor);
 
 /* Misc functions: */
-inline string itos(int i) {
+inline string itos(int i) { /* Integer to string */
 	char buff[10];
 	sprintf(buff, "%d",i);
 	return string(buff);
 }
 
-inline string ftos(float i) {
+inline string ftos(float i) { /* Float to string */
 	char buff[10];
 	sprintf(buff, "%f", i);
 	return string(buff);
 }
 
-inline string iden(unsigned int level) {
+inline string iden(unsigned int level) { /* Indentation level */
 	string identation = "";
 	for(;level;level--) identation += "\t";
 	return identation;
 }
 
-inline char * idenc(unsigned int level) {
+inline char * idenc(unsigned int level) { /* Indentation level (C string) */
 	return (char*)iden(level).c_str();
 }
 

@@ -519,7 +519,8 @@ public:
 		struct_declaration_list * struct_decl_list,
 		char * struct_union_id
 	)
-	: struct_union(struct_union), struct_decl_list(struct_decl_list), struct_union_id(struct_union_id) {}
+	: struct_union(struct_union), struct_decl_list(struct_decl_list),
+	  struct_union_id(struct_union_id) {}
 };
 
 class struct_or_union {
@@ -733,7 +734,7 @@ public:
 		alignment_specifier * align_spec
 	)
 	{
-		if(stor_class_spec)	this->stor_class_spec.push_back(stor_class_spec);
+		if(stor_class_spec) this->stor_class_spec.push_back(stor_class_spec);
 		if(type_spec) this->type_spec.push_back(type_spec);
 		if(type_qualif) this->type_qualif.push_back(type_qualif);
 		if(func_spec) this->func_spec.push_back(func_spec);
@@ -774,7 +775,8 @@ public:
 		expression * expr,
 		generic_selection * gen_sel
 	)
-	: id(id), con(con), str(str), expr(expr), gen_sel(gen_sel) { }
+	: id(id), con(con), str(str),
+	  expr(expr), gen_sel(gen_sel) { }
 };
 
 class postfix_expression {
@@ -878,7 +880,9 @@ public:
 		type_name * t_name,
 		unsigned int alignof_op
 	)
-	: post_expr(0), inc_dec_op(0), un_op(0), cast_expr(0), sizeof_op(0), t_name(0), alignof_op(0) {
+	: post_expr(0), inc_dec_op(0), un_op(0), cast_expr(0),
+	  sizeof_op(0), t_name(0), alignof_op(0)
+	{
 		add(post_expr, op, un_op, cast_expr, sizeof_op, t_name, alignof_op);
 	}
 };
@@ -1005,7 +1009,8 @@ public:
 		char * veril_constant,
 		char which
 	)
-	: f_constant(f_constant), i_constant(i_constant), enum_constant(enum_constant), veril_constant(veril_constant), which(which) { }
+	: f_constant(f_constant), i_constant(i_constant), enum_constant(enum_constant),
+	  veril_constant(veril_constant), which(which) { }
 };
 
 class enumeration_constant {
