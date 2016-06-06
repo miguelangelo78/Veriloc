@@ -8,7 +8,9 @@
 using namespace std;
 
 extern "C" int yylex();
+#ifdef YYPARSE_PARAM
 extern "C" int yyparse();
+#endif /* ! YYPARSE_PARAM */
 extern "C" int yywrap();
 extern void yyerror(const char * str);
 extern void comment(void);
@@ -16,5 +18,5 @@ extern void sym_add(char * key, int token_id);
 extern int sym_check_type(void);
 
 extern FILE * yyin;
-extern int yylineno;
+extern int lineno;
 extern char * yytext;

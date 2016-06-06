@@ -1,6 +1,6 @@
 %{
 	#include <headers.h>
-	int yylineno;
+	int lineno;
 %}
 
 %e  1019
@@ -166,6 +166,6 @@ negedge			{ yylval.uival = NEGEDGE; return NEGEDGE; }
 ({SP}?\"([^"\\\n]|{ES})*\"{WS}*)+ { yylval.sval = strdup(yytext); return STRING_LITERAL; }
 {L}{A}*							{ return sym_check_type(); }
 .							;
-[ \t\n]        				yylineno++;
+[ \t\n]        				lineno++;
 
 %%

@@ -1,19 +1,20 @@
-ENV =
-ifeq ($(OS),Windows_NT)
-	ENV += toolchain/Windows/Tools/GnuWin32/bin/
-endif
 SRC = src
 OBJ = obj
 GEN = $(SRC)/gen
 BIN = bin
 EXEC = veriloc
+RM = rm
+CXX = g++
+CPPFLAGS = -Isrc -Isrc/gen -lfl
+ENV =
+ifeq ($(OS),Windows_NT)
+	ENV += toolchain/Windows/Tools/GnuWin32/bin/
+	CPPFLAGS += -Ltoolchain/Windows/Tools/GnuWin32/lib
+endif
 LEX = $(ENV)flex
 BISON = $(ENV)bison
 YFLAGS = -d
-LFLAGS =
-RM = rm
-CXX = g++
-CPPFLAGS = -Isrc -Isrc/gen -Ltoolchain/Windows/Tools/GnuWin32/lib -lfl
+LFLAGS = 
 
 makefile_dir:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
@@ -62,12 +63,12 @@ all: $(OBJS)
 
 clean:
 	$(RM) $(GEN)/*.*
-	$(RM) $(BIN)/*.exe
+	$(RM) $(BIN)/*
 	$(RM) $(OBJ)/*.o
 
 run:
 	@$(BIN)/$(EXEC) ${ARGS}
 
 test%:
-	@cd $(makefile_dir)\..
-	@$(BIN)/$(EXEC) testbench\$@
+	@cd $(makefile_dir)/..
+	@$(BIN)/$(EXEC) testbench/$@

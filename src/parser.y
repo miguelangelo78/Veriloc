@@ -490,7 +490,7 @@ constant:
 	I_CONSTANT { $$ = new constant($1, 0, 0, 0, 1); }
 	| F_CONSTANT  { $$ = new constant(0, $1, 0, 0, 2); }
 	| ENUMERATION_CONSTANT { $$ = new constant(0, 0, $1, 0, 3); }
-	| VERIL_CONSTANT { $$ = new constant(0, 0, 0, $1, 4) };
+	| VERIL_CONSTANT { $$ = new constant(0, 0, 0, $1, 4); };
 
 enumeration_constant: IDENTIFIER { $$ = new enumeration_constant($1); };
 

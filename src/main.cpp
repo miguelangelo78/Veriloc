@@ -22,7 +22,7 @@ int sym_check_type(void) {
 }
 
 void yyerror(const char * str) {
-	printf("\n\n>> ERROR: %s in line %d at: \"%s\"", str, yylineno + 1, yytext);
+	printf("\n\n>> ERROR: %s in line %d at: \"%s\"", str, lineno + 1, yytext);
 	printf("\n\nPress enter to exit...");
 	exit(-1);
 }

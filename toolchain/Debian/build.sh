@@ -1,12 +1,13 @@
-@cd "%~dp0"
-@echo off
-cls
+#!/bin/bash
+cd `dirname $0`
+clear
 
-cd ..\..
+cd ../.. # Go to the root of the project
 
 printf "***** Building Makefile... *****\n\n"
 make -f toolchain/makefile.mak all
 
 printf "\n***** Done *****\n\n"
 
-PAUSE
+printf "\nPress enter to exit"
+read
