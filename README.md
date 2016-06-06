@@ -184,7 +184,7 @@ public:
 	output data[7:0];
 	input read_en, cs;
 	
-	always(ce, read_en, address) {
+	always(cs, read_en, address) {
 		switch(address) {
 		case 0: data = 50;
 		case 1: data = 55;
@@ -210,7 +210,7 @@ public:
 ```verilog
 module ROM(input [3:0] address, output [7:0] data, input read_en, cs);
 
-always @(ce or read_en or address)
+always @(cs or read_en or address)
 begin
         case(address)
                 0:
