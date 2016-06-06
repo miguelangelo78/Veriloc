@@ -54,7 +54,7 @@ public:
 **Verilog** output:
 ```verilog
 module DFF(input data, clk, reset, output reg q);
-public:
+
 always @(posedge clk or negedge reset)
 begin
         if(~reset)
