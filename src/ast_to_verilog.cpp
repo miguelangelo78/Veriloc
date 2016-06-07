@@ -3,7 +3,6 @@
 
 /*****  TODO: ******/
 /* - Add support for functions */
-/* - Add support for port mapping */
 /* - Add support for global code */
 /* - Add a preprocessor mechanism */
 /* - Add a type checker mechanism */
