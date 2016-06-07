@@ -1,10 +1,9 @@
-module dff {
-	output reg q;
-	input d, clear, preset, clock;
-
-	always(clear, preset)
-		q <= !clear ? 0 : !preset ? 1 : q;
-
-	always(posedge clock)
-		q = !d + 2;
+module AND {
+public:
+	reg input a,b,c;
+	output q[8:0;10:2] = 1;
+	
+	always {
+		a = b;
+	}
 };

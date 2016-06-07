@@ -2,17 +2,16 @@
 #include <ast_to_verilog.h>
 
 /*****  TODO: ******/
-/* - Make use of the access modifiers */
-/* - Add support for port mapping */
-/* - Add support for functions */
 /* - Add support for NORMAL variables */
+/* - Add support for functions */
+/* - Add support for port mapping */
 /* - Add support for global code */
 /* - Add a preprocessor mechanism */
 /* - Add a type checker mechanism */
 
 /* Declare module */
 string ast_module(root * mod) {
-	string str = "module " + string(mod->root_name) + "(" + ast_module_argslist(mod) + ");\n";
+	string str = "module " + string(mod->root_name) + "(" + ast_module_argslist(mod) + ");";
 	/* Declare variables, constants and parameters */
 	str += ast_var_decl(mod);
 	/* Declare functions */
@@ -22,13 +21,13 @@ string ast_module(root * mod) {
 	/* Add all "always" statements */
 	str += ast_always_stat(mod);
 	/* Close module declaration */
-	str += "endmodule\n\n";
+	str += "\nendmodule\n\n";
 	return str;
 }
 
 /* Declare testbench */
 string ast_testbench(root * testb) {
-	string str = "module " + string(testb->root_name) + ";\n";
+	string str = "module " + string(testb->root_name) + ";";
 	/* Declare variables, constants and parameters */
 	str += ast_var_decl(testb);
 	/* Declare functions */
@@ -40,13 +39,12 @@ string ast_testbench(root * testb) {
 	/* Add initial statement (use constructors) */
 	str += ast_initial_stat(testb);
 	/* Close testbench declaration */
-	str += "endmodule\n\n";
+	str += "\nendmodule\n\n";
 	return str;
 }
 
 /* Converts an AST tree to Verilog source code: */
 void ast_convert(std::vector<root*> & roots) {
-	printf(">> Output:\n/**** GENERATED VERILOG CODE (from Veriloc) ****/\n\n");
 	for(auto root : roots) {
 		switch(root->root_type) {
 		case MODULE_NAME:
@@ -59,5 +57,4 @@ void ast_convert(std::vector<root*> & roots) {
 		default: break;
 		}
 	}
-	printf("/****  END OF GENERATED SOURCE CODE ****/\n");
 }

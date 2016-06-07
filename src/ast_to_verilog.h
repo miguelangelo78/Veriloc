@@ -50,10 +50,15 @@ inline string ftos(float i) { /* Float to string */
 	return string(buff);
 }
 
-inline string iden(unsigned int level) { /* Indentation level */
-	string identation = "";
+inline string iden(unsigned int level, char terminate) { /* Indentation level */
+	string identation = terminate ? "\n" : "";
 	for(;level;level--) identation += "\t";
 	return identation;
+}
+
+
+inline string iden(unsigned int level) { /* Indentation level */
+	return iden(level, 1);
 }
 
 inline char * idenc(unsigned int level) { /* Indentation level (C string) */
