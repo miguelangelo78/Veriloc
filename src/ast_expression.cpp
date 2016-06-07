@@ -15,6 +15,17 @@ string postfix_to_str(postfix_expression * post) {
 	return str;
 }
 
+string argument_expr_list_to_str(argument_expression_list * arg_expr_list) {
+	string str = "";
+	str += "(";
+	if(arg_expr_list) {
+		int ctr = 0;
+		for(auto aexpr : arg_expr_list->assign_expr)
+			str += const_expr_to_str(aexpr->cond_expr) + (ctr++ < arg_expr_list->assign_expr.size() - 1 ? ", " : "");
+	}
+	return str + ")";
+}
+
 string const_expr_to_str(arith_logic_expression * expr) {
 	string str = "";
 	int i = 0;
@@ -36,18 +47,9 @@ string const_expr_to_str(arith_logic_expression * expr) {
 					postfix_expression * post_expr = cast_expr->un_expr->post_expr;
 					/* Look for function calls: */
 					if(post_expr->is_func) {
-						if(post_expr->arg_expr_list) {
-							/* We found a function call with arguments */
-							str_tmp += "(";
-							int ctr = 0;
-							for(auto aexpr : post_expr->arg_expr_list->assign_expr)
-								str_tmp += const_expr_to_str(aexpr->cond_expr) + (ctr++<post_expr->arg_expr_list->assign_expr.size()-1 ? ", " : "");
-							str_tmp += ")";
-						} else {
-							/* We found a function call without arguments */
-							str_tmp += "()";
-						}
-					}
+						/* We found a function call with or without arguments */
+						str_tmp += argument_expr_list_to_str(post_expr->arg_expr_list);
+ 					}
 				}
 
 				/* Look for increments/decrements/array indexing: */

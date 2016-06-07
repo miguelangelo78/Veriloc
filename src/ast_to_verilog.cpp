@@ -12,7 +12,7 @@
 string ast_module(root * mod) {
 	string str = "module " + string(mod->root_name) + "(" + ast_module_argslist(mod) + ");";
 	/* Declare variables, constants and parameters */
-	str += ast_var_decl(mod);
+	str += ast_var_decl(mod,0);
 	/* Declare functions */
 	str += ast_func_decl(mod);
 	/* Assign outputs */
@@ -28,7 +28,7 @@ string ast_module(root * mod) {
 string ast_testbench(root * testb) {
 	string str = "module " + string(testb->root_name) + ";";
 	/* Declare variables, constants and parameters */
-	str += ast_var_decl(testb);
+	str += ast_var_decl(testb,1);
 	/* Declare functions */
 	str += ast_func_decl(testb);
 	/* Assign outputs: */

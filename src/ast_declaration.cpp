@@ -127,14 +127,14 @@ string ast_module_argslist(root * mod) {
 }
 
 /* Declare public/private variables. Should not redeclare wire/regs that are public */
-string ast_var_decl(root * mod) {
+string ast_var_decl(root * mod, char is_testbench) {
 	string str = "";
 	unsigned int modifier = PRIVATE;
 
 	for(auto decl : mod->t_unit_ctx->ext_decl) {
 		int ctr = 0;
 
-		if(decl->struct_acc)
+		if(decl->struct_acc && !is_testbench)
 			modifier = decl->struct_acc->access_type;
 
 		if(decl->var_def) {
@@ -158,7 +158,14 @@ string ast_var_decl(root * mod) {
 			}
 
 			/* Fetch initialization declaration list: */
-			str += init_decl_list_to_str(var, var->init_decl_list) + ";";
+			str += init_decl_list_to_str(var, var->init_decl_list);
+
+			/* Port mapping: */
+			if(var->init_decl_list->init_decl[0]->decl->direct_decl->arg_list.size() > 0)
+				str += argument_expr_list_to_str(var->init_decl_list->init_decl[0]->decl->direct_decl->arg_list[0]);
+
+			/* Terminate declaration: */
+			str += ";";
 		}
 	}
 	return str;

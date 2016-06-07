@@ -270,24 +270,24 @@ declarator:
 	| direct_declarator { $$ = new declarator(0, $1); };
 
 direct_declarator: 
-	IDENTIFIER { $$ = new direct_declarator($1,0,0,0,0,0,0,0,0,0,0,0,0,0); } /* <- Name of the function */
-	| '(' declarator ')' { $$ = new direct_declarator(0,0,0,$2,0,0,0,0,0,0,0,0,0,0); }
-	| direct_declarator '[' ']' { $$->add(0,0,0,0,0,0,0,0,0,1,0,0,0,0); }
-	| direct_declarator '[' constant_expression ':' constant_expression ']' { $$->add(0,0,0,0,$3,$5,0,0,0,1,0,0,0,0); }
+	IDENTIFIER { $$ = new direct_declarator($1,0,0,0,0,0,0,0,0,0,0,0,0,0,0); } /* <- Name of the function */
+	| '(' declarator ')' { $$ = new direct_declarator(0,0,0,$2,0,0,0,0,0,0,0,0,0,0,0); }
+	| direct_declarator '[' ']' { $$->add(0,0,0,0,0,0,0,0,0,1,0,0,0,0,0); }
+	| direct_declarator '[' constant_expression ':' constant_expression ']' { $$->add(0,0,0,0,$3,$5,0,0,0,1,0,0,0,0,0); }
 	| direct_declarator '['
 		constant_expression ':' constant_expression ';'
-		constant_expression ':' constant_expression ']' { $$->add(0,0,0,0,$3,$5,$7,$9,0,1,0,0,0,0); }
-	| direct_declarator '[' '*' ']' { $$->add(0,0,0,0,0,0,0,0,0,1,0,0,0,0); }
-	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']' { $$->add(0,0,0,0,0,0,0,0,1,1,$4,$5,0,0); }
-	| direct_declarator '[' STATIC assignment_expression ']' { $$->add(0,0,0,0,0,0,0,0,1,1,0,$4,0,0); }
-	| direct_declarator '[' type_qualifier_list '*' ']' { $$->add(0,0,0,0,0,0,0,0,0,1,$3,0,0,0); }
-	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' { $$->add(0,0,0,0,0,0,0,0,1,1,$3,$5,0,0); }
-	| direct_declarator '[' type_qualifier_list assignment_expression ']' { $$->add(0,0,0,0,0,0,0,0,0,1,$3,$4,0,0); }
-	| direct_declarator '[' type_qualifier_list ']' { $$->add(0,0,0,0,0,0,0,0,0,1,$3,0,0,0); }
-	| direct_declarator '[' assignment_expression ']' { $$->add(0,0,0,0,0,0,0,0,0,1,0,$3,0,0); }
-	| direct_declarator '(' parameter_type_list ')' { $$->add(0,0,0,0,0,0,0,0,0,0,0,0,$3,0); }
-	| direct_declarator '(' ')' { $$->add(0,0,0,0,0,0,0,0,0,0,0,0,0,0); }
-	| direct_declarator '(' identifier_list ')' { $$->add(0,0,0,0,0,0,0,0,0,0,0,0,0,$3); };
+		constant_expression ':' constant_expression ']' { $$->add(0,0,0,0,$3,$5,$7,$9,0,1,0,0,0,0,0); }
+	| direct_declarator '[' '*' ']' { $$->add(0,0,0,0,0,0,0,0,0,1,0,0,0,0,0); }
+	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']' { $$->add(0,0,0,0,0,0,0,0,1,1,$4,$5,0,0,0); }
+	| direct_declarator '[' STATIC assignment_expression ']' { $$->add(0,0,0,0,0,0,0,0,1,1,0,$4,0,0,0); }
+	| direct_declarator '[' type_qualifier_list '*' ']' { $$->add(0,0,0,0,0,0,0,0,0,1,$3,0,0,0,0); }
+	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']' { $$->add(0,0,0,0,0,0,0,0,1,1,$3,$5,0,0,0); }
+	| direct_declarator '[' type_qualifier_list assignment_expression ']' { $$->add(0,0,0,0,0,0,0,0,0,1,$3,$4,0,0,0); }
+	| direct_declarator '[' type_qualifier_list ']' { $$->add(0,0,0,0,0,0,0,0,0,1,$3,0,0,0,0); }
+	| direct_declarator '[' assignment_expression ']' { $$->add(0,0,0,0,0,0,0,0,0,1,0,$3,0,0,0); }
+	| direct_declarator '(' parameter_type_list ')' { $$->add(0,0,0,0,0,0,0,0,0,0,0,0,$3,0,1); }
+	| direct_declarator '(' ')' { $$->add(0,0,0,0,0,0,0,0,0,0,0,0,0,0,1); }
+	| direct_declarator '(' argument_expression_list ')' { $$->add(0,0,0,0,0,0,0,0,0,0,0,0,0,$3,1); };
 
 pointer:
 	'*' type_qualifier_list pointer { $$ = $3; $$->add($2, $3); }

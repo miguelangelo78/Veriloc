@@ -238,10 +238,11 @@ public:
 	std::vector<constant_expression *> expr1, expr2, expr3, expr4;
 	char is_static;
 	char is_array;
+	char is_func;
 	std::vector<type_qualifier_list *> type_qualif_list;
 	std::vector<assignment_expression *> assign_expr;
 	std::vector<parameter_type_list *> param_type_list;
-	std::vector<identifier_list *> id_list;
+	std::vector<argument_expression_list *> arg_list;
 
 	void add(
 		char * id,
@@ -257,7 +258,8 @@ public:
 		type_qualifier_list * type_qualif_list,
 		assignment_expression * assign_expr,
 		parameter_type_list * param_type_list,
-		identifier_list * id_list
+		argument_expression_list * arg_list,
+		char is_func
 	)
 	{
 		if(id) this->id = id;
@@ -273,7 +275,8 @@ public:
 		if(type_qualif_list) this->type_qualif_list.push_back(type_qualif_list);
 		if(assign_expr) this->assign_expr.push_back(assign_expr);
 		if(param_type_list) this->param_type_list.push_back(param_type_list);
-		if(id_list) this->id_list.push_back(id_list);
+		if(arg_list) this->arg_list.push_back(arg_list);
+		if(is_func) this->is_func;
 	}
 
 	direct_declarator(
@@ -290,13 +293,14 @@ public:
 			type_qualifier_list * type_qualif_list,
 			assignment_expression * assign_expr,
 			parameter_type_list * param_type_list,
-			identifier_list * id_list
+			argument_expression_list * arg_list,
+			char is_func
 	)
-	: id(0), module_name(0), testbench_name(0)
+	: id(0), module_name(0), testbench_name(0), is_func(0)
 	{
 		add(id, module_name, testbench_name, decl, expr1,
 			expr2, expr3, expr4, is_static, is_array, type_qualif_list,
-			assign_expr, param_type_list, id_list);
+			assign_expr, param_type_list, arg_list, is_func);
 	}
 };
 

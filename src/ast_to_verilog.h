@@ -30,10 +30,11 @@ extern string type_to_str(unsigned int typespec);
 extern string type_to_str(std::vector<type_specifier *> & typespec);
 extern string qualifier_to_str(unsigned int qualif);
 extern string primary_expression_to_str(primary_expression * prim_expr);
+extern string argument_expr_list_to_str(argument_expression_list * arg_expr_list);
 
 /* Declarations (functions, variables, ports and assignments): */
 extern string ast_func_decl(root * mod);
-extern string ast_var_decl(root * mod);
+extern string ast_var_decl(root * mod, char is_testbench);
 extern string ast_module_argslist(root * mod);
 extern string assign_outputs(root * mod, char use_constructor);
 

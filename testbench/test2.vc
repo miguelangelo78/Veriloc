@@ -1,6 +1,27 @@
 module AND {
-	output reg i;
-	input wire m;
-	const SIZE = 8-x;
-	bool h[1:4;7:0];
+public:
+	input reg a,b;
+	output q = a & b;
+};
+
+testbench AND_tb {
+public:
+	reg a,b;
+	wire q;
+
+	AND my_and(a,b,q);
+	
+	AND_tb() {
+		a = 0;
+		b = 0;
+		#1;
+		a = 1;
+		#100;
+		a = 0;
+		b = 1;
+		#100;
+		a = 1,
+		b = 1;
+		#100;
+	}
 };
