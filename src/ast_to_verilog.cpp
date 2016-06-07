@@ -2,7 +2,6 @@
 #include <ast_to_verilog.h>
 
 /*****  TODO: ******/
-/* - Add support for NORMAL variables */
 /* - Add support for functions */
 /* - Add support for port mapping */
 /* - Add support for global code */

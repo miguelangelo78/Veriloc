@@ -148,11 +148,11 @@ posedge			{ yylval.uival = POSEDGE; return POSEDGE; }
 negedge			{ yylval.uival = NEGEDGE; return NEGEDGE; }
 
 	/* Variables/numbers/strings/constants/everything else: */
--?{HP}{H}+{IS}?					{ yylval.uival = strtol(yytext, 0, 16); return I_CONSTANT; }
--?{NZ}{D}*{IS}?					{ yylval.uival = atoi(yytext); return I_CONSTANT; }
--?"0"{O}*{IS}?					{ yylval.uival = atoi(yytext); return I_CONSTANT; }
--?{CP}?"'"([^'\\\n]|{ES})+"'"	{ yylval.uival = atoi(yytext); return I_CONSTANT; }
--?{D}+(b|d|o|h)(s|u)?{HV}+		{ yylval.sval = new char[strlen(yytext)+1]; strcpy(yylval.sval, yytext); return VERIL_CONSTANT; }
+{HP}{H}+{IS}?					{ yylval.uival = strtol(yytext, 0, 16); return I_CONSTANT; }
+{NZ}{D}*{IS}?					{ yylval.uival = atoi(yytext); return I_CONSTANT; }
+"0"{O}*{IS}?					{ yylval.uival = atoi(yytext); return I_CONSTANT; }
+{CP}?"'"([^'\\\n]|{ES})+"'"		{ yylval.uival = atoi(yytext); return I_CONSTANT; }
+{D}+(b|d|o|h)(s|u)?{HV}+		{ yylval.sval = new char[strlen(yytext)+1]; strcpy(yylval.sval, yytext); return VERIL_CONSTANT; }
 
 {D}+{E}{FS}?					{ yylval.fval = atof(yytext); return F_CONSTANT; }
 {D}*"."{D}+{E}?{FS}?			{ yylval.fval = atof(yytext); return F_CONSTANT; }

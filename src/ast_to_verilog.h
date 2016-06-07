@@ -27,6 +27,7 @@ extern string const_expr_to_str(arith_logic_expression * expr);
 extern string const_expr_to_str(conditional_expression * condexpr);
 extern string operator_to_str(unsigned int op);
 extern string type_to_str(unsigned int typespec);
+extern string type_to_str(std::vector<type_specifier *> & typespec);
 extern string qualifier_to_str(unsigned int qualif);
 extern string primary_expression_to_str(primary_expression * prim_expr);
 
@@ -34,7 +35,6 @@ extern string primary_expression_to_str(primary_expression * prim_expr);
 extern string ast_func_decl(root * mod);
 extern string ast_var_decl(root * mod);
 extern string ast_module_argslist(root * mod);
-extern string ast_assign_outputs_step2(init_declarator * id);
 extern string assign_outputs(root * mod, char use_constructor);
 
 /* Misc functions: */
@@ -55,7 +55,6 @@ inline string iden(unsigned int level, char terminate) { /* Indentation level */
 	for(;level;level--) identation += "\t";
 	return identation;
 }
-
 
 inline string iden(unsigned int level) { /* Indentation level */
 	return iden(level, 1);

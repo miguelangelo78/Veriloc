@@ -145,8 +145,25 @@ string type_to_str(unsigned int typespec) {
 	switch(typespec) {
 	case REG: return "reg";
 	case WIRE: return "wire";
+	case CHAR: return "byte";
+	case INT: return "int";
+	case BOOL: return "bit";
+	case SHORT: return "shortint";
+	case LONG: return "longint";
 	default: return "";
 	}
+}
+
+/* Combination of types: */
+string type_to_str(std::vector<type_specifier *> & typespec) {
+	unsigned int type1 = typespec[0]->type, type2 = typespec[1]->type;
+	if((type1 == SHORT && type2 == INT) || (type1 == INT && type2 == SHORT)) return "shortint";
+	if((type1 == LONG && type2 == INT) || (type1 == INT && type2 == LONG)) return "longint";
+	if(type1 == UNSIGNED) return "unsigned "+type_to_str(type2);
+	if(type2 == UNSIGNED) return "unsigned "+type_to_str(type1);
+	if(type1 == SIGNED) return "signed "+type_to_str(type2);
+	if(type2 == SIGNED) return "signed "+type_to_str(type1);
+	return "";
 }
 
 string qualifier_to_str(unsigned int qualif) {
@@ -154,6 +171,9 @@ string qualifier_to_str(unsigned int qualif) {
 	case OUTPUT: return "output";
 	case INPUT: return "input";
 	case INOUT: return "inout";
+	case CONST: return "parameter";
+	case UNSIGNED: return "unsigned";
+	case SIGNED: return "signed";
 	default: return "";
 	}
 }

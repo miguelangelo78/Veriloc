@@ -1,9 +1,6 @@
 module AND {
-public:
-	reg input a,b,c;
-	output q[8:0;10:2] = 1;
-	
-	always {
-		a = b;
-	}
+	output reg i;
+	input wire m;
+	const SIZE = 8-x;
+	short input int d = SIZE*2;
 };
