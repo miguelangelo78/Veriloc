@@ -63,7 +63,7 @@ string init_decl_list_to_str(declaration * var, init_declarator_list * init_decl
 			str += decl_primitive(init_decl_list->init_decl[i]);
 		} else {
 			/* Translate C variable to Verilog variable */
-			str += string(" ") + init_decl_list->init_decl[i]->decl->direct_decl->id;
+			str += decl_primitive(init_decl_list->init_decl[i]);
 			if(init_decl_list->init_decl[i]->init) {
 				/* Initialize variable straight away: */
 				initializer * init = init_decl_list->init_decl[i]->init;
