@@ -2,5 +2,5 @@ module AND {
 	output reg i;
 	input wire m;
 	const SIZE = 8-x;
-	short input int d = SIZE*2;
+	unsigned short d = SIZE*2;
 };

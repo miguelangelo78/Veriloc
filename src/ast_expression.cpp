@@ -150,6 +150,8 @@ string type_to_str(unsigned int typespec) {
 	case BOOL: return "bit";
 	case SHORT: return "shortint";
 	case LONG: return "longint";
+	case UNSIGNED: return "unsigned";
+	case SIGNED: return "signed";
 	default: return "";
 	}
 }
@@ -172,8 +174,6 @@ string qualifier_to_str(unsigned int qualif) {
 	case INPUT: return "input";
 	case INOUT: return "inout";
 	case CONST: return "parameter";
-	case UNSIGNED: return "unsigned";
-	case SIGNED: return "signed";
 	default: return "";
 	}
 }
