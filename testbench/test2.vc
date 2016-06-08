@@ -1,27 +1,5 @@
 module AND {
 public:
-	input reg a,b;
-	output q = a & b;
-};
-
-testbench AND_tb {
-public:
-	reg a,b;
-	wire q;
-
-	AND my_and(a,b,q);
-	
-	AND_tb() {
-		a = 0;
-		b = 0;
-		#1;
-		a = 1;
-		#100;
-		a = 0;
-		b = 1;
-		#100;
-		a = 1,
-		b = 1;
-		#100;
-	}
+	reg str[8:0] = data ? "test" : "world";
+	always add(1,2);
 };

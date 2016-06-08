@@ -163,7 +163,7 @@ negedge			{ yylval.uival = NEGEDGE; return NEGEDGE; }
 
 #[0-9]+							{ yylval.sval = new char[strlen(yytext)+1]; strcpy(yylval.sval, yytext); return D_CONSTANT; }
 
-({SP}?\"([^"\\\n]|{ES})*\"{WS}*)+ { yylval.sval = strdup(yytext); return STRING_LITERAL; }
+({SP}?\"([^"\\\n]|{ES})*\")+ { yylval.sval = new char[strlen(yytext)+1]; strcpy(yylval.sval, yytext); return STRING_LITERAL; }
 {L}{A}*							{ return sym_check_type(); }
 .							;
 [ \t\n]        				lineno++;

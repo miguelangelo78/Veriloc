@@ -102,18 +102,15 @@ string ast_module_argslist(root * mod) {
 			/* Check it it's a valid declaration for the module arglist's purpose: */
 			if(!is_var_primitive(var)) continue;
 
+			int ctr = 0;
+
 			/* Declare qualifiers: */
-			if(var_has_qualifier(var))
-				for(auto qualif : var->decl_spec->type_qualif)
-					str += qualifier_to_str(qualif->qualifier);
-			else
-				str += ", ";
+			for(auto qualif : var->decl_spec->type_qualif)
+				str += (ctr++ ? " " : "") + qualifier_to_str(qualif->qualifier);
 
 			/* Declare specifiers: */
-			if(var_has_specifier(var) && decl_ctr < primitive_var_count)
-				str += " ";
 			for(auto type : var->decl_spec->type_spec)
-				str += type_to_str(type->type);
+				str += (ctr++ ? " " : "") + type_to_str(type->type);
 
 			/* Output variable names: */
 			str += init_decl_list_to_str(var, var->init_decl_list);
