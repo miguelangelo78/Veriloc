@@ -207,7 +207,9 @@ string primary_expression_to_str(primary_expression * prim_expr) {
 		else if(prim_expr->str) {
 			return prim_expr->str->str;
 		}
-		else /* Put expression inside braces: */
+		else if(prim_expr->sys_func) {
+			return prim_expr->sys_func;
+		} else /* Put expression inside braces: */
 			return "(" + ast_expr_stat(prim_expr->expr, 0, 0) + ")";
 	}
 }

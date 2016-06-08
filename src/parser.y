@@ -193,7 +193,7 @@
 %token <uival> INPUT OUTPUT INOUT CONFIG FORCE POSEDGE NEGEDGE <sval> IDENTIFIER 
 %token <ival> I_CONSTANT <fval> F_CONSTANT <sval> D_CONSTANT STRING_LITERAL
 %token <sval> TYPEDEF_NAME ENUMERATION_CONSTANT VERIL_CONSTANT GENERIC STATIC_ASSERT
-%token <sval> MODULE_NAME TESTBENCH_NAME GLOBAL_SRC
+%token <sval> MODULE_NAME TESTBENCH_NAME GLOBAL_SRC SYSFUNC
 
 %start source
 %%
@@ -477,14 +477,15 @@ function_specifier:
 alignment_specifier: 
 	ALIGNAS '(' type_name ')' { $$ = new alignment_specifier($3, 0); }
 	| ALIGNAS '(' constant_expression ')' { $$ = new alignment_specifier(0, $3); };
-
+	
 	/* Expressions and constants: */
 primary_expression: 
-	IDENTIFIER { $$ = new primary_expression($1, 0, 0, 0, 0); }
-	| constant { $$ = new primary_expression(0, $1, 0, 0, 0); }
-	| string { $$ = new primary_expression(0, 0, $1, 0, 0); }
-	| '(' expression ')' { $$ = new primary_expression(0, 0, 0, $2, 0); }
-	| generic_selection { $$ = new primary_expression(0, 0, 0, 0, $1); };
+	IDENTIFIER { $$ = new primary_expression($1, 0, 0, 0, 0, 0); }
+	| constant { $$ = new primary_expression(0, $1, 0, 0, 0, 0); }
+	| string { $$ = new primary_expression(0, 0, $1, 0, 0, 0); }
+	| '(' expression ')' { $$ = new primary_expression(0, 0, 0, $2, 0, 0); }
+	| generic_selection { $$ = new primary_expression(0, 0, 0, 0, $1, 0); }
+	| SYSFUNC { $$ = new primary_expression(0, 0, 0, 0, 0, $1); };
 
 constant:
 	I_CONSTANT { $$ = new constant($1, 0, 0, 0, 1); }

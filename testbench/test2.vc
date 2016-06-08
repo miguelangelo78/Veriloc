@@ -1,5 +1,31 @@
 module AND {
 public:
-	reg str[8:0] = data ? "test" : "world";
-	always add(1,2);
+	input a,b;
+	output y = a & b;
+};
+
+testbench AND_tb {
+	reg a,b;
+	wire y;
+	AND gate(a,b,y);
+
+	AND_tb() {
+		$monitor(a,b,y);
+		$dumpfile("ex.vcd");
+		$dumpvars(0, AND_tb);
+
+		a = 0;
+		b = 0;
+
+		#100
+		a = 1;
+
+		#100
+		a = 0;
+		b = 1;
+
+		#100
+		a = 1;
+		b = 1;
+	}
 };

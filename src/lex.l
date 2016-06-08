@@ -165,7 +165,8 @@ negedge			{ yylval.uival = NEGEDGE; return NEGEDGE; }
 
 ({SP}?\"([^"\\\n]|{ES})*\")+ { yylval.sval = new char[strlen(yytext)+1]; strcpy(yylval.sval, yytext); return STRING_LITERAL; }
 {L}{A}*							{ return sym_check_type(); }
-.							;
-[ \t\n]        				lineno++;
+\${L}{A}*						{ yylval.sval = new char[strlen(yytext)+1]; strcpy(yylval.sval, yytext); return SYSFUNC; }
+.								;
+[ \t\n]        					lineno++;
 
 %%

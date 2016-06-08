@@ -767,6 +767,7 @@ public:
 class primary_expression {
 public:
 	char * id;
+	char * sys_func;
 	constant * con;
 	prod_string * str;
 	expression * expr;
@@ -777,10 +778,11 @@ public:
 		constant * con,
 		prod_string * str,
 		expression * expr,
-		generic_selection * gen_sel
+		generic_selection * gen_sel,
+		char * sys_func
 	)
 	: id(id), con(con), str(str),
-	  expr(expr), gen_sel(gen_sel) { }
+	  expr(expr), gen_sel(gen_sel), sys_func(sys_func) { }
 };
 
 class postfix_expression {
