@@ -200,7 +200,7 @@
 source:
 	{ $$ = new root(0,0,0,0); }
 	| source root { $$ = new root(0,0,0,0); }
-	| source translation_unit { $$ = new root((char*)"__global__", GLOBAL_SRC, 0, $2); }
+	| source translation_unit_context { $$ = new root((char*)"__global__", GLOBAL_SRC, $2, 0); }
 
 	/************** Root grammar: **************/
 root:

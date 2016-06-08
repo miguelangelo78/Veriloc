@@ -177,7 +177,7 @@ string ast_var_decl(declaration * var, char terminate, unsigned int idl) {
 }
 
 /* Declare public/private variables. Should not redeclare wire/regs that are public */
-string ast_module_var_decl(root * mod, char is_testbench) {
+string ast_module_var_decl(root * mod, char is_testbench, unsigned int idl) {
 	string str = "";
 	unsigned int modifier = PRIVATE;
 
@@ -193,7 +193,7 @@ string ast_module_var_decl(root * mod, char is_testbench) {
 				continue; /* We do not want to redeclare the global ports */
 
 			/* Declare variable: */
-			str += ast_var_decl(var, 1, 1);
+			str += ast_var_decl(var, 1, idl);
 
 			/* Port mapping: */
 			if(var->init_decl_list->init_decl[0]->decl->direct_decl->arg_list.size() > 0)
@@ -211,27 +211,27 @@ string ast_parameter_decl_to_str(parameter_declaration * param_decl) {
 	return decl_spec + (decl_spec.size() ? " " : "") + decl_primitive(param_decl->decl);
 }
 
-string ast_func_decl(function_definition * fdef) {
+string ast_func_decl(function_definition * fdef, unsigned int idl) {
 	string str = "";
 	if(fdef->decl_spec->type_spec.size() > 1 || !fdef->decl_spec->type_spec.size())
 		return str;
 
 	/* Function type and name: */
 	direct_declarator * decl = fdef->decl->direct_decl;
-	str += iden(1) + type_to_str(fdef->decl_spec->type_spec[0]->type) + " " + decl->id + ";";
+	str += iden(idl) + type_to_str(fdef->decl_spec->type_spec[0]->type) + " " + decl->id + ";";
 
 	/* Arguments: */
 	if(decl->param_type_list.size() == 1) {
 		int ctr = 0;
 		char carry = 0;
-		str += iden(2);
+		str += iden(idl);
 		for(auto param : decl->param_type_list[0]->param_list->param_decl) {
 			if((!param->decl_spec->type_qualif.size() && !param->decl_spec->type_spec.size())
 					|| (param->decl_spec->type_spec.size() && !param->decl_spec->type_spec[0]->type)) carry = 1;
 			else carry = 0;
 
 			if(carry) str += ", ";
-			else if(ctr++) str += ";" + iden(2);
+			else if(ctr++) str += ";" + iden(idl+1);
 			str += ast_parameter_decl_to_str(param);
 		}
 		str += ";";
@@ -239,13 +239,13 @@ string ast_func_decl(function_definition * fdef) {
 
 	unsigned int func_type = fdef->decl_spec->type_spec[0]->type;
 	/* Compound: */
-	str += iden(1) + "begin" + ast_compound_stat(fdef->comp_statement, 1) + iden(1) + "end"
-			+ iden(1) + (func_type == TASK ? "endtask" : func_type == DEF ? "endfunction" : "");
+	str += iden(idl) + "begin" + ast_compound_stat(fdef->comp_statement, idl) + iden(idl) + "end"
+			+ iden(idl) + (func_type == TASK ? "endtask" : func_type == DEF ? "endfunction" : "");
 	return str;
 }
 
 /* Declare functions and reassign the return expression to the name of the function itself */
-string ast_module_func_decl(root * mod) {
+string ast_module_func_decl(root * mod, unsigned int idl) {
 	string str = "";
 	for (auto ext_decl : mod->t_unit_ctx->ext_decl) {
 		if(ext_decl->func_def) {
@@ -255,7 +255,7 @@ string ast_module_func_decl(root * mod) {
 			/* Determine if it's a task or function: */
 			if(fdef->decl_spec->type_spec.size() == 1) {
 				unsigned int type = fdef->decl_spec->type_spec[0]->type;
-				if(type == DEF || type == TASK) str += ast_func_decl(fdef);
+				if(type == DEF || type == TASK) str += ast_func_decl(fdef, idl);
 			}
 		}
 	}

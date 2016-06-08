@@ -70,7 +70,7 @@ int main(int argc, char ** argv) {
 		ast_convert(roots);
 
 		fclose(yyin);
-		printf("Done.\n\nPress enter to exit");
+		printf("\n\nDone.\n\nPress enter to exit");
 	} else {
 		cout << "Usage: veriloc [filename]\n";
 		return 1;

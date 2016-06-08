@@ -1,13 +1,7 @@
-module HAS_TASK {
-private:
-	const MAXBITS = 8;
-	reg REG_X[MAXBITS - 1], NEW_REG;
+const SIZE = 10;
 
-	task REVERSE_BITS(input DIN[MAXBITS-1:0], output DOUT [MAXBITS-1:0], int k) {
-		for(k = 0; k < MAXBITS; k = k + 1)
-			DOUT[MAXBITS-k] = DIN[k];
-	}
-
-	always(REG_X)
-		REVERSE_BITS(REG_X, NEW_REG);
+module AND {
+public:
+	input a[SIZE:0], b[SIZE:0];
+	output y[SIZE:0] = a & b;
 };
