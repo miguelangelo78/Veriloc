@@ -11,9 +11,9 @@
 string ast_module(root * mod) {
 	string str = "module " + string(mod->root_name) + "(" + ast_module_argslist(mod) + ");";
 	/* Declare variables, constants and parameters */
-	str += ast_var_decl(mod,0);
+	str += ast_module_var_decl(mod,0);
 	/* Declare functions */
-	str += ast_func_decl(mod);
+	str += ast_module_func_decl(mod);
 	/* Assign outputs */
 	str += assign_outputs(mod, 1);
 	/* Add all "always" statements */
@@ -27,9 +27,9 @@ string ast_module(root * mod) {
 string ast_testbench(root * testb) {
 	string str = "module " + string(testb->root_name) + ";";
 	/* Declare variables, constants and parameters */
-	str += ast_var_decl(testb,1);
+	str += ast_module_var_decl(testb, 1);
 	/* Declare functions */
-	str += ast_func_decl(testb);
+	str += ast_module_func_decl(testb);
 	/* Assign outputs: */
 	str += assign_outputs(testb, 0); /* Assign only on declaration, not on constructor */
 	/* Add all "always" statements */

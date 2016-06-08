@@ -33,8 +33,13 @@ extern string primary_expression_to_str(primary_expression * prim_expr);
 extern string argument_expr_list_to_str(argument_expression_list * arg_expr_list);
 
 /* Declarations (functions, variables, ports and assignments): */
-extern string ast_func_decl(root * mod);
-extern string ast_var_decl(root * mod, char is_testbench);
+extern string ast_module_func_decl(root * mod);
+extern string init_decl_list_to_str(declaration * var, init_declarator_list * init_decl_list, char init_constr);
+extern string ast_parameter_decl_to_str(parameter_declaration * param_decl);
+extern string ast_func_decl(function_definition * fdef);
+extern string ast_decl_spec(declaration_specifiers * decl_spec);
+extern string ast_var_decl(declaration * var, char terminate, unsigned int idl);
+extern string ast_module_var_decl(root * mod, char is_testbench);
 extern string ast_module_argslist(root * mod);
 extern string assign_outputs(root * mod, char use_constructor);
 

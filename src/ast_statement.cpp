@@ -59,35 +59,39 @@ string ast_loop_stat(iteration_statement * it, unsigned int idl) {
 	case 1: /* Do While */
 		ignore_statement = 1;
 		str += iden(idl) + "do" + iden(idl) + "begin" + general_statement_to_str(it->stat, idl)
-				+ iden(idl)+"end" + iden(idl)+"while(" + ast_expr_stat(it->expr, 0, 0) + ");";
+				+ iden(idl)+"end" + iden(idl) + "while(" + ast_expr_stat(it->expr, 0, 0) + ");";
 		break;
 	case 2: /* For */
 		str += iden(idl) + "for(";
 
-		/* Fetch counter declarations/initializations: */
+		/* First type of for loop: WITH declaration: */
 		if(it->decl) {
-			int ctr = 0;
-			for(auto decl : it->decl->init_decl_list->init_decl) {
-				string initialization = "";
-				if(decl->init)
-					initialization += " = " + const_expr_to_str(decl->init->assign_exp->cond_expr);
-				str += string(decl->decl->direct_decl->id) + initialization
-						+ (ctr++ < it->decl->init_decl_list->init_decl.size() - 1 ? ", " : "");
-			}
+			/* Fetch counter declarations/initializations: */
+			str += ast_var_decl(it->decl, 0, 0) + ";";
+			/* Loop condition: */
+			if(it->expr_stat1 && it->expr_stat1->expr && it->expr_stat1->expr->assign_expr.size() > 0)
+				str += " " + ast_expr_stat(it->expr_stat1->expr, 0, 0);
+			str += ";";
+			/* Loop incrementation: */
+			if(it->expr)
+				str += " " + ast_expr_stat(it->expr, 0, 0);
+		} else {
+			/* 2ND Type of for loop:
+			 * No variable has been declared on the first part of the for loop.
+			 * There could be something else there */
+			if(it->expr_stat1 && it->expr_stat1->expr && it->expr_stat1->expr->assign_expr.size() > 0)
+				str += ast_expr_stat(it->expr_stat1->expr, 0, 0);
+			str += ";";
+			/* Loop condition: */
+			if(it->expr_stat2 && it->expr_stat2->expr && it->expr_stat2->expr->assign_expr.size() > 0)
+				str += " " + ast_expr_stat(it->expr_stat2->expr, 0, 0);
+			str += ";";
+			/* Loop incrementation: */
+			if(it->expr)
+				str += " " + ast_expr_stat(it->expr, 0, 0);
 		}
-		str += ";";
 
-		/* Fetch loop condition: */
-		if(it->expr_stat1 && it->expr_stat1->expr && it->expr_stat1->expr->assign_expr.size() > 0)
-			str += " " + const_expr_to_str(it->expr_stat1->expr->assign_expr[0]->cond_expr);
-		else if(it->expr_stat2 && it->expr_stat2->expr && it->expr_stat2->expr->assign_expr.size() > 0)
-			str += " " + const_expr_to_str(it->expr_stat2->expr->assign_expr[0]->cond_expr);
-		str += ";";
-
-		/* Fetch loop incrementation */
-		if(it->expr)
-			str += " " + ast_expr_stat(it->expr, 0, 0);
-		str += ")"+iden(idl)+"begin";
+		str += ")" + iden(idl) + "begin";
 		break;
 	}
 
@@ -105,9 +109,8 @@ string ast_jump_stat(jump_statement * jmp, unsigned int idl) {
 	case 3: /* RETURN */
 		str += iden(idl) + "return";
 		if(jmp->expr)
-			str += " " + ast_expr_stat(jmp->expr, 1, idl);
-		else
-			str+=";";
+			str += " " + ast_expr_stat(jmp->expr, 0, 0);
+		str += ";";
 		break;
 	}
 	return str;
@@ -120,6 +123,7 @@ string ast_compound_stat(compound_statement * comp, unsigned int idl) {
 
 	for(auto bl : comp->b_item_list->b_item)
 		if(bl->stat) str += general_statement_to_str(bl->stat, idl);
+		else if(bl->decl) str += ast_var_decl(bl->decl, 1, idl + 1) + ";";
 	return str;
 }
 

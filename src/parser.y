@@ -183,7 +183,7 @@
 %token <uival> RIGHT_OP LEFT_OP INC_OP DEC_OP PTR_OP AND_OP OR_OP GE_OP LE_OP
 
 	/* Token Keywords: */
-%token <uival> VOID INT CHAR BOOL FLOAT DOUBLE REG WIRE 
+%token <uival> VOID INT CHAR BOOL FLOAT DOUBLE REG WIRE DEF TASK
 %token <uival> CONST SIGNED UNSIGNED LONG SHORT TYPEDEF STATIC ENUM UNION STRUCT AUTO
 %token <uival> THIS DEFINE INCLUDE PRAGMA EXTERN INLINE SIZEOF ALIGNAS ALIGNOF
 %token <uival> RETURN GOTO BREAK CONTINUE
@@ -406,7 +406,9 @@ type_specifier:
 	| struct_or_union_specifier { $$ = new type_specifier($1); }
 	| enum_specifier { $$ = new type_specifier($1); }
 	| MODULE_NAME { $$ = new type_specifier($1); }
-	| TESTBENCH_NAME { $$ = new type_specifier($1); };
+	| TESTBENCH_NAME { $$ = new type_specifier($1); }
+	| DEF { $$ = new type_specifier($1); }
+	| TASK { $$ = new type_specifier($1); };
 
 	/* Data structures: */
 struct_or_union_specifier:

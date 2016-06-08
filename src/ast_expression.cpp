@@ -154,6 +154,8 @@ string type_to_str(unsigned int typespec) {
 	case LONG: return "longint";
 	case UNSIGNED: return "unsigned";
 	case SIGNED: return "signed";
+	case DEF: return "function";
+	case TASK: return "task";
 	default: return "";
 	}
 }

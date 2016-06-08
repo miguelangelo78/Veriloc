@@ -51,7 +51,7 @@ string decl_primitive(init_declarator * id) {
 	return str;
 }
 
-string init_decl_list_to_str(declaration * var, init_declarator_list * init_decl_list) {
+string init_decl_list_to_str(declaration * var, init_declarator_list * init_decl_list, char init_constr) {
 	string str = "";
 
 	for(int i = 0;i < init_decl_list->init_decl.size(); i++) {
@@ -61,6 +61,11 @@ string init_decl_list_to_str(declaration * var, init_declarator_list * init_decl
 				var_type = var->decl_spec->type_spec[0]->type;
 			str += (i > 0 ? "," : "");
 			str += decl_primitive(init_decl_list->init_decl[i]);
+			if(init_decl_list->init_decl[i]->init && !init_constr) {
+				/* Initialize variable straight away: */
+				initializer * init = init_decl_list->init_decl[i]->init;
+				str += " = " +  const_expr_to_str(init->assign_exp->cond_expr);
+			}
 		} else {
 			/* Translate C variable to Verilog variable */
 			str += decl_primitive(init_decl_list->init_decl[i]);
@@ -113,7 +118,7 @@ string ast_module_argslist(root * mod) {
 				str += (ctr++ ? " " : "") + type_to_str(type->type);
 
 			/* Output variable names: */
-			str += init_decl_list_to_str(var, var->init_decl_list);
+			str += init_decl_list_to_str(var, var->init_decl_list, 1);
 
 			if(decl_ctr++ < primitive_var_count - 1)
 				str += ", ";
@@ -123,8 +128,38 @@ string ast_module_argslist(root * mod) {
 	return str;
 }
 
+string ast_decl_spec(declaration_specifiers * decl_spec) {
+	string str = "";
+	int ctr = 0;
+
+	/* Fetch declaration specifiers and qualifiers: */
+	for(auto qualif : decl_spec->type_qualif)
+		str += (ctr++ ? " " : "") + qualifier_to_str(qualif->qualifier);
+
+	int type_count = decl_spec->type_spec.size();
+	if(type_count) {
+		if(type_count == 1) {
+			type_specifier * type_spec = decl_spec->type_spec[0];
+			string type_str = type_spec->type_id ? type_spec->type_id : type_to_str(type_spec->type);
+			str += (ctr++ ? " " : "") + type_str;
+		}
+		else {
+			str += (ctr++ ? " " : "") + type_to_str(decl_spec->type_spec);
+		}
+	}
+	return str;
+}
+
+string ast_var_decl(declaration * var, char terminate, unsigned int idl) {
+	string str = terminate ? iden(idl) : "";
+	/* Fetch declaration specifiers and qualifiers: */
+	str += ast_decl_spec(var->decl_spec);
+	/* Fetch initialization declaration list and return it: */
+	return str + init_decl_list_to_str(var, var->init_decl_list, 0);
+}
+
 /* Declare public/private variables. Should not redeclare wire/regs that are public */
-string ast_var_decl(root * mod, char is_testbench) {
+string ast_module_var_decl(root * mod, char is_testbench) {
 	string str = "";
 	unsigned int modifier = PRIVATE;
 
@@ -139,23 +174,8 @@ string ast_var_decl(root * mod, char is_testbench) {
 			if(is_var_primitive(var) && modifier == PUBLIC)
 				continue; /* We do not want to redeclare the global ports */
 
-			str += iden(1);
-			/* Fetch declaration specifiers and qualifiers: */
-			for(auto qualif : var->decl_spec->type_qualif)
-				str += (ctr++ ? " " : "") + qualifier_to_str(qualif->qualifier);
-			int type_count = var->decl_spec->type_spec.size();
-			if(type_count) {
-				if(type_count == 1) {
-					type_specifier * type_spec = var->decl_spec->type_spec[0];
-					string type_str = type_spec->type_id ? type_spec->type_id : type_to_str(type_spec->type);
-					str += (ctr++ ? " " : "") + type_str;
-				}
-				else
-					str += (ctr++ ? " " : "") + type_to_str(var->decl_spec->type_spec);
-			}
-
-			/* Fetch initialization declaration list: */
-			str += init_decl_list_to_str(var, var->init_decl_list);
+			/* Declare variable: */
+			str += ast_var_decl(var, 1, 1);
 
 			/* Port mapping: */
 			if(var->init_decl_list->init_decl[0]->decl->direct_decl->arg_list.size() > 0)
@@ -168,10 +188,59 @@ string ast_var_decl(root * mod, char is_testbench) {
 	return str;
 }
 
-/* Declare functions and reassign the return expression to the name of the function itself */
-string ast_func_decl(root * mod) {
+string ast_parameter_decl_to_str(parameter_declaration * param_decl) {
+	string decl_spec = ast_decl_spec(param_decl->decl_spec);
+	return decl_spec + (decl_spec.size() ? " " : "") + param_decl->decl->direct_decl->id;
+}
+
+string ast_func_decl(function_definition * fdef) {
 	string str = "";
-	// TODO
+	if(fdef->decl_spec->type_spec.size() > 1 || !fdef->decl_spec->type_spec.size())
+		return str;
+
+	/* Function type and name: */
+	direct_declarator * decl = fdef->decl->direct_decl;
+	str += iden(1) + type_to_str(fdef->decl_spec->type_spec[0]->type) + " " + decl->id + ";";
+
+	/* Arguments: */
+	if(decl->param_type_list.size() == 1) {
+		int ctr = 0;
+		char carry = 0;
+		str += iden(2);
+		for(auto param : decl->param_type_list[0]->param_list->param_decl) {
+			if((!param->decl_spec->type_qualif.size() && !param->decl_spec->type_spec.size())
+					|| (param->decl_spec->type_spec.size() && !param->decl_spec->type_spec[0]->type)) carry = 1;
+			else carry = 0;
+
+			if(carry) str += ", ";
+			else if(ctr++) str += ";" + iden(2);
+			str += ast_parameter_decl_to_str(param);
+		}
+		str += ";";
+	}
+
+	unsigned int func_type = fdef->decl_spec->type_spec[0]->type;
+	/* Compound: */
+	str += iden(1) + "begin" + ast_compound_stat(fdef->comp_statement, 1)
+			+ iden(1) + (func_type == TASK ? "endtask" : func_type == DEF ? "endfunction" : "end");
+	return str;
+}
+
+/* Declare functions and reassign the return expression to the name of the function itself */
+string ast_module_func_decl(root * mod) {
+	string str = "";
+	for (auto ext_decl : mod->t_unit_ctx->ext_decl) {
+		if(ext_decl->func_def) {
+			function_definition * fdef = ext_decl->func_def;
+			if(!fdef->decl_spec) continue; /* This is a constructor. We don't want it */
+
+			/* Determine if it's a task or function: */
+			if(fdef->decl_spec->type_spec.size() == 1) {
+				unsigned int type = fdef->decl_spec->type_spec[0]->type;
+				if(type == DEF || type == TASK) str += ast_func_decl(fdef);
+			}
+		}
+	}
 	return str;
 }
 

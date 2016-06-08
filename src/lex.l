@@ -93,6 +93,8 @@ char			{ yylval.uival = CHAR; return CHAR; }
 float			{ yylval.uival = FLOAT; return FLOAT; }
 double			{ yylval.uival = DOUBLE; return DOUBLE; }
 bool			{ yylval.uival = BOOL; return BOOL; }
+def				{ yylval.uival = DEF; return DEF; }
+task			{ yylval.uival = TASK; return TASK; }
 auto			return AUTO;
 reg				{ yylval.uival = REG; return REG; }
 wire			{ yylval.uival = WIRE; return WIRE; }
