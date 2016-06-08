@@ -274,6 +274,9 @@ direct_declarator:
 	| '(' declarator ')' { $$ = new direct_declarator(0,0,0,$2,0,0,0,0,0,0,0,0,0,0,0); }
 	| direct_declarator '[' ']' { $$->add(0,0,0,0,0,0,0,0,0,1,0,0,0,0,0); }
 	| direct_declarator '[' constant_expression ':' constant_expression ']' { $$->add(0,0,0,0,$3,$5,0,0,0,1,0,0,0,0,0); }
+	| direct_declarator '[' ';' constant_expression ':' constant_expression ']' { $$->add(0,0,0,0,0,0,$4,$6,0,1,0,0,0,0,0); }
+	| direct_declarator '[' constant_expression ':' constant_expression ';' ']' { $$->add(0,0,0,0,$3,$5,0,0,0,1,0,0,0,0,0); }
+	| direct_declarator '[' ';' ']' { $$->add(0,0,0,0,0,0,0,0,0,1,0,0,0,0,0); }
 	| direct_declarator '['
 		constant_expression ':' constant_expression ';'
 		constant_expression ':' constant_expression ']' { $$->add(0,0,0,0,$3,$5,$7,$9,0,1,0,0,0,0,0); }
@@ -332,6 +335,7 @@ direct_abstract_declarator:
 	'(' abstract_declarator ')' { $$ = new direct_abstract_declarator($2,0,0,0,0,0,0,0,0,0); }
 	| '[' ']' { $$ = new direct_abstract_declarator(0,1,0,0,0,0,0,0,0,0); }
 	| '[' constant_expression ':' constant_expression ']' { $$ = new direct_abstract_declarator(0,1,$2,$4,0,0,0,0,0,0); }
+	| '[' constant_expression ']' { $$ = new direct_abstract_declarator(0,1,$2,0,0,0,0,0,0,0); }
 	| '[' constant_expression ':' constant_expression ';'
 		constant_expression ':' constant_expression ']' { $$ = new direct_abstract_declarator(0,1,$2,$4,$6,$8,0,0,0,0); }
 	| '[' '*' ']' { $$ = new direct_abstract_declarator(0,1,0,0,0,0,0,0,0,0); }
@@ -514,6 +518,9 @@ postfix_expression:
 	primary_expression { $$ = new postfix_expression($1, 0, 0); }
 	| postfix_expression '[' expression ']' { $$->add($3,0,0,0,0,0,0,0,0); }
 	| postfix_expression '[' constant_expression ':' constant_expression ']' { $$->add(0,$3,$5,0,0,0,0,0,0); }
+	| postfix_expression '[' ';' constant_expression ':' constant_expression ']' { $$->add(0,0,0,$4,$6,0,0,0,0); }
+	| postfix_expression '[' constant_expression ':' constant_expression ';' ']' { $$->add(0,$3,$5,0,0,0,0,0,0); }
+	| postfix_expression '[' ';' ']' { $$->add(0,0,0,0,0,0,0,0,0); }
 	| postfix_expression '['
 		constant_expression ':' constant_expression ';'
 		constant_expression ':' constant_expression ']' { $$->add(0,$3,$5,$7,$9,0,0,0,0); }
@@ -625,7 +632,7 @@ expression:
 	assignment_expression { $$ = new expression($1); }
 	| expression ',' assignment_expression { $$->add($3); };
 
-constant_expression: 
+constant_expression:
 	conditional_expression { $$ = new constant_expression($1); };
 
 	/* Statements: */

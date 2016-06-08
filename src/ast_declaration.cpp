@@ -36,25 +36,43 @@ char is_constructor(external_declaration_internal * ext_decl) {
 }
 
 /* Declarate a single primitive variable (no type nor specifier) */
-string decl_primitive(init_declarator * id) {
+string decl_primitive(declarator * decl) {
 	string str = "";
 	string expr_l = "", expr_r = "";
-	if(id->decl->direct_decl->expr1.size() > 0) {
-		for(auto expr : id->decl->direct_decl->expr1) expr_l += const_expr_to_str(expr->cond_expr); expr_l += ":";
-		for(auto expr : id->decl->direct_decl->expr2) expr_l += const_expr_to_str(expr->cond_expr); expr_l = " [" + expr_l + "]";
+
+	if(decl->direct_decl->assign_expr.size()) {
+		expr_l += " ";
+		for(auto assign_expr : decl->direct_decl->assign_expr)
+			expr_l += "[" + const_expr_to_str(assign_expr->cond_expr) + "]";
 	}
-	if(id->decl->direct_decl->expr3.size() > 0) {
-		for(auto expr : id->decl->direct_decl->expr3) expr_r += const_expr_to_str(expr->cond_expr); expr_r += ":";
-		for(auto expr : id->decl->direct_decl->expr4) expr_r += const_expr_to_str(expr->cond_expr); expr_r = "[" + expr_r + "]";
+	if(decl->direct_decl->expr1.size() > 0) {
+		expr_l += " ";
+		for(int i = 0; i < decl->direct_decl->expr1.size() > 0; i++) {
+			expr_l += "[" +
+					const_expr_to_str(decl->direct_decl->expr1[i]->cond_expr) + ":" +
+					const_expr_to_str(decl->direct_decl->expr2[i]->cond_expr) + "]";
+		}
 	}
-	str += expr_l + " " + id->decl->direct_decl->id + (expr_r.size() > 0 ? " " + expr_r : "");
+	if(decl->direct_decl->expr3.size() > 0) {
+		for(int i = 0; i <  decl->direct_decl->expr3.size() > 0; i++) {
+			expr_r += "[" +
+					const_expr_to_str(decl->direct_decl->expr3[i]->cond_expr) + ":" +
+					const_expr_to_str(decl->direct_decl->expr4[i]->cond_expr) + "]";
+		}
+	}
+	str += expr_l + " " + decl->direct_decl->id + (expr_r.size() > 0 ? " " + expr_r : "");
 	return str;
+}
+
+/* Declarate a single primitive variable (no type nor specifier) */
+string decl_primitive(init_declarator * id) {
+	return decl_primitive(id->decl);
 }
 
 string init_decl_list_to_str(declaration * var, init_declarator_list * init_decl_list, char init_constr) {
 	string str = "";
 
-	for(int i = 0;i < init_decl_list->init_decl.size(); i++) {
+	for(int i = 0; i < init_decl_list->init_decl.size(); i++) {
 		unsigned int var_type = WIRE; /* If no specifier is given, then it's a Wire by default */
 		if(is_var_primitive(var)) {
 			if(var_has_specifier(var))
@@ -190,7 +208,7 @@ string ast_module_var_decl(root * mod, char is_testbench) {
 
 string ast_parameter_decl_to_str(parameter_declaration * param_decl) {
 	string decl_spec = ast_decl_spec(param_decl->decl_spec);
-	return decl_spec + (decl_spec.size() ? " " : "") + param_decl->decl->direct_decl->id;
+	return decl_spec + (decl_spec.size() ? " " : "") + decl_primitive(param_decl->decl);
 }
 
 string ast_func_decl(function_definition * fdef) {
@@ -221,8 +239,8 @@ string ast_func_decl(function_definition * fdef) {
 
 	unsigned int func_type = fdef->decl_spec->type_spec[0]->type;
 	/* Compound: */
-	str += iden(1) + "begin" + ast_compound_stat(fdef->comp_statement, 1)
-			+ iden(1) + (func_type == TASK ? "endtask" : func_type == DEF ? "endfunction" : "end");
+	str += iden(1) + "begin" + ast_compound_stat(fdef->comp_statement, 1) + iden(1) + "end"
+			+ iden(1) + (func_type == TASK ? "endtask" : func_type == DEF ? "endfunction" : "");
 	return str;
 }
 

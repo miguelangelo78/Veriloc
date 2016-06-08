@@ -148,7 +148,7 @@ string type_to_str(unsigned int typespec) {
 	case REG: return "reg";
 	case WIRE: return "wire";
 	case CHAR: return "byte";
-	case INT: return "int";
+	case INT: return "integer";
 	case BOOL: return "bit";
 	case SHORT: return "shortint";
 	case LONG: return "longint";

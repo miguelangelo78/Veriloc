@@ -2,7 +2,6 @@
 #include <ast_to_verilog.h>
 
 /*****  TODO: ******/
-/* - Add support for functions */
 /* - Add support for global code */
 /* - Add a preprocessor mechanism */
 /* - Add a type checker mechanism */
