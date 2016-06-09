@@ -3,6 +3,7 @@
 
 /*****  TODO: ******/
 /* - Add a preprocessor mechanism */
+/* - Fix bugs and improve the language before moving to the next TODO */
 /* - Add a type checker mechanism */
 
 /* Declare module */
@@ -50,20 +51,22 @@ string ast_global(root * global) {
 }
 
 /* Converts an AST tree to Verilog source code: */
-void ast_convert(std::vector<root*> & roots) {
+string ast_convert(std::vector<root*> & roots) {
+	string ret = "";
 	int ctr = 0;
 	for(auto root : roots) {
 		switch(root->root_type) {
 		case MODULE_NAME:
-			printf("%s%s", ctr++? "\n\n" : "", ast_module(root).c_str()); /* Declare module */
+			ret += (ctr++ ? "\n\n" : "") + ast_module(root); /* Declare module */
 			break;
 		case TESTBENCH_NAME:
-			printf("%s%s", ctr++? "\n\n" : "", ast_testbench(root).c_str()); /* Declare testbench */
+			ret += (ctr++ ? "\n\n" : "") + ast_testbench(root); /* Declare testbench */
 			break;
 		case GLOBAL_SRC:
-			printf("%s%s", ctr++? "\n" : "", ast_global(root).c_str()); /* Declare global code */
+			ret += (ctr++ ? "\n" : "") + ast_global(root); /* Declare global code */
 			break;
 		default: break;
 		}
 	}
+	return ret;
 }

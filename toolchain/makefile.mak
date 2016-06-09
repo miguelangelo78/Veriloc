@@ -25,7 +25,8 @@ PARSER = parser
 ####### Objects/Outputs:
 OBJS = $(GEN)/$(PARSER).tab.c $(GEN)/$(LEXER).yy.c $(OBJ)/main.o $(OBJ)/ast.o \
 	$(OBJ)/ast_to_verilog.o $(OBJ)/ast_statement.o \
-	$(OBJ)/ast_expression.o $(OBJ)/ast_declaration.o
+	$(OBJ)/ast_expression.o $(OBJ)/ast_declaration.o \
+	$(OBJ)/cmdline.o
 
 ####### Lexer:
 $(GEN)/$(LEXER).yy.c: $(SRC)/$(LEXER).l
@@ -57,6 +58,9 @@ $(OBJ)/ast_expression.o: $(SRC)/ast_expression.cpp
 $(OBJ)/ast_declaration.o: $(SRC)/ast_declaration.cpp
 	$(CXX) -o $@ -c $^ -std=c++11 $(CPPFLAGS)
 	
+$(OBJ)/cmdline.o: $(SRC)/cmdline.cpp
+	$(CXX) -o $@ -c $^ -std=c++11 $(CPPFLAGS)
+
 all: $(OBJS)
 	$(CXX) -o $(BIN)/$(EXEC) $^ $(CPPFLAGS)
 	@printf "Finished!\n"
@@ -71,4 +75,4 @@ run:
 
 test%:
 	@cd $(makefile_dir)/..
-	@$(BIN)/$(EXEC) testbench/$@
+	@$(BIN)/$(EXEC) testbench/$@ -o $@ -c icarus

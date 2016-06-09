@@ -169,12 +169,12 @@ string ast_decl_spec(declaration_specifiers * decl_spec) {
 	return str;
 }
 
-string ast_var_decl(declaration * var, char terminate, unsigned int idl) {
+string ast_var_decl(declaration * var, char terminate, unsigned int idl, char is_testbench) {
 	string str = terminate ? iden(idl) : "";
 	/* Fetch declaration specifiers and qualifiers: */
 	str += ast_decl_spec(var->decl_spec);
 	/* Fetch initialization declaration list and return it: */
-	return str + init_decl_list_to_str(var, var->init_decl_list, 0);
+	return str + init_decl_list_to_str(var, var->init_decl_list, !is_testbench);
 }
 
 /* Declare public/private variables. Should not redeclare wire/regs that are public */
@@ -194,7 +194,7 @@ string ast_module_var_decl(root * mod, char is_testbench, unsigned int idl) {
 				continue; /* We do not want to redeclare the global ports */
 
 			/* Declare variable: */
-			str += ast_var_decl(var, 1, idl);
+			str += ast_var_decl(var, 1, idl, is_testbench);
 
 			/* Port mapping: */
 			if(var->init_decl_list->init_decl[0]->decl->direct_decl->arg_list.size() > 0)

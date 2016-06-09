@@ -67,7 +67,7 @@ string ast_loop_stat(iteration_statement * it, unsigned int idl) {
 		/* First type of for loop: WITH declaration: */
 		if(it->decl) {
 			/* Fetch counter declarations/initializations: */
-			str += ast_var_decl(it->decl, 0, 0) + ";";
+			str += ast_var_decl(it->decl, 0, 0, 0) + ";";
 			/* Loop condition: */
 			if(it->expr_stat1 && it->expr_stat1->expr && it->expr_stat1->expr->assign_expr.size() > 0)
 				str += " " + ast_expr_stat(it->expr_stat1->expr, 0, 0);
@@ -123,7 +123,7 @@ string ast_compound_stat(compound_statement * comp, unsigned int idl) {
 
 	for(auto bl : comp->b_item_list->b_item)
 		if(bl->stat) str += general_statement_to_str(bl->stat, idl);
-		else if(bl->decl) str += ast_var_decl(bl->decl, 1, idl + 1) + ";";
+		else if(bl->decl) str += ast_var_decl(bl->decl, 1, idl + 1, 0) + ";";
 	return str;
 }
 

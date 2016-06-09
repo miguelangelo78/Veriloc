@@ -1,10 +1,15 @@
 #include <headers.h>
 #include <map>
+#include <utility>
 #include <ast_to_verilog.h>
 
 extern int yyparse();
-
-#define DEBUG 0
+/* Command line API: */
+extern void cmdline_parse(int argc, char ** argv);
+extern char cmd_has_opt(string opt);
+extern char cmd_has_opt(char opt);
+extern std::pair<string,string> cmd_query(string opt_query);
+extern std::pair<char,string> cmd_query(char opt_query);
 
 map<string, int> sym_table;
 
@@ -56,6 +61,10 @@ int main(int argc, char ** argv) {
 			cout << "Could not open '" << argv[1] << "'\n";
 			return -1;
 		}
+
+		if(argc > 2)
+			cmdline_parse(argc, argv);
+
 		ast_init();
 		/* Parse it:  */
 		yyin = file;
@@ -67,12 +76,14 @@ int main(int argc, char ** argv) {
 		ast_dump();
 #endif
 		/* Convert tree into Verilog source code: */
-		ast_convert(roots);
+		string verilog_source = ast_convert(roots);
+
+		printf("%s", verilog_source.c_str());
 
 		fclose(yyin);
 		printf("\n\nDone.\n\nPress enter to exit");
 	} else {
-		cout << "Usage: veriloc [filename]\n";
+		cout << "Usage: veriloc [filename] [options ... [-o -c]]\n";
 		return 1;
 	}
 	return 0;

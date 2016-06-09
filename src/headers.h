@@ -7,6 +7,8 @@
 
 using namespace std;
 
+#define DEBUG 0
+
 extern "C" int yylex();
 #ifdef YYPARSE_PARAM
 extern "C" int yyparse();

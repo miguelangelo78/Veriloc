@@ -4,7 +4,7 @@
 using namespace std;
 
 /* Converts the AST tree to Verilog source code: */
-void ast_convert(std::vector<root*> &roots);
+string ast_convert(std::vector<root*> &roots);
 
 /* Statements: */
 extern string ast_sel_list_stat(selection_statement_list * sellist, unsigned int idl);
@@ -38,7 +38,7 @@ extern string init_decl_list_to_str(declaration * var, init_declarator_list * in
 extern string ast_parameter_decl_to_str(parameter_declaration * param_decl);
 extern string ast_func_decl(function_definition * fdef, unsigned int idl);
 extern string ast_decl_spec(declaration_specifiers * decl_spec);
-extern string ast_var_decl(declaration * var, char terminate, unsigned int idl);
+extern string ast_var_decl(declaration * var, char terminate, unsigned int idl, char is_testbench);
 extern string ast_module_var_decl(root * mod, char is_testbench, unsigned int idl);
 extern string ast_module_argslist(root * mod);
 extern string assign_outputs(root * mod, char use_constructor);

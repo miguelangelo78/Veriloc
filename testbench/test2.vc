@@ -1,5 +1,7 @@
 module AND {
+public:
+	input a, b;
+	output b = a & b;
 private:
-	input char a, b;
-	output char b = a & b;
+	reg a = 1;
 };
