@@ -1,5 +1,5 @@
 # Veriloc
-Veriloc is a C compiler that converts C code to normal Verilog code.
+Veriloc is a compiler that converts C/C++/Verilog hybrid language to normal Verilog code.
 
 
 # How to Build
