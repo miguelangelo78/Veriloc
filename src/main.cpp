@@ -1,7 +1,9 @@
 #include <headers.h>
 #include <map>
 #include <utility>
+#include <fstream>
 #include <ast_to_verilog.h>
+#include <external_tool.h>
 
 extern int yyparse();
 /* Command line API: */
@@ -53,6 +55,15 @@ void comment(void) {
 	yyerror("unterminated comment");
 }
 
+void write_to_file(string filename, string source_code) {
+	ofstream f;
+	f.open(filename.c_str());
+	f << source_code;
+	f.close();
+}
+
+
+
 int main(int argc, char ** argv) {
 	if(argc > 1) {
 		/* Read input source: */
@@ -84,21 +95,21 @@ int main(int argc, char ** argv) {
 		/* Use the command line results: */
 		if(cmd_has_opt('o')) {
 			/* Output source code into user specified file */
-
-		} else if(!cmd_has_opt("stdio")) {
-			/* Output to file a.v */
-
-		} else {
+			write_to_file(cmd_query('o').second, verilog_source);
+		} else if(cmd_has_opt("stdio")) {
 			/* Output to standard io */
 			cout << verilog_source;
+		} else {
+			/* Output to file a.v */
+			write_to_file("a.v", verilog_source);
 		}
 
 		if(cmd_has_opt('c')) {
 			/* Compile the result using an external Verilog compiler */
-
+			external_execute(compiler_type(cmd_query('c').second), verilog_source);
 			if(cmd_has_opt('w')) {
 				/* Also feed the result into GTKWave */
-
+				external_execute(VIEWER_GTKWAVE, verilog_source);
 			}
 		}
 

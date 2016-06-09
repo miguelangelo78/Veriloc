@@ -10,6 +10,8 @@
 #include <vector>
 using namespace std;
 
+#define NULLSTR "(null)"
+
 vector<std::pair<char, string>> opts_single_list;
 vector<std::pair<string, string>> opts_list;
 
@@ -28,7 +30,7 @@ string get_string_opt(string opt) {
 	for(int i = 0; i < opt.size(); i++)
 		if(opt[i] != '-')
 			return opt.substr(i, opt.size());
-	return "(null)";
+	return NULLSTR;
 }
 
 /* Pushes options such as -o, -c, -e, etc */
@@ -44,13 +46,13 @@ void cmd_push(string opt, string arg) {
 std::pair<char,string> cmd_query(char opt_query) {
 	for(auto pair : opts_single_list)
 		if(pair.first == opt_query) return pair;
-	return make_pair(0, "(null)");
+	return make_pair(0, NULLSTR);
 }
 
 std::pair<string,string> cmd_query(string opt_query) {
 	for(auto pair : opts_list)
 		if(pair.first == opt_query) return pair;
-	return make_pair("(null)", "(null)");
+	return make_pair(NULLSTR, NULLSTR);
 }
 
 char cmd_has_opt(char opt) {
@@ -73,8 +75,8 @@ void cmdline_parse(int argc, char ** argv) {
 		char opt_type;
 		if((opt_type = is_opt(opt)))
 			if(opt_type == 1)
-				cmd_push_single(opt, ctr < argc ? string(argv[ctr]) : "(null)");
+				cmd_push_single(opt, ctr < argc ? string(argv[ctr]) : NULLSTR);
 			else if(opt_type == 2)
-				cmd_push(opt, ctr < argc ? string(argv[ctr]) : "(null)");
+				cmd_push(opt, ctr < argc ? string(argv[ctr]) : NULLSTR);
 	}
 }

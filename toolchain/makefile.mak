@@ -26,7 +26,7 @@ PARSER = parser
 OBJS = $(GEN)/$(PARSER).tab.c $(GEN)/$(LEXER).yy.c $(OBJ)/main.o $(OBJ)/ast.o \
 	$(OBJ)/ast_to_verilog.o $(OBJ)/ast_statement.o \
 	$(OBJ)/ast_expression.o $(OBJ)/ast_declaration.o \
-	$(OBJ)/cmdline.o
+	$(OBJ)/cmdline.o $(OBJ)/external_tool.o
 
 ####### Lexer:
 $(GEN)/$(LEXER).yy.c: $(SRC)/$(LEXER).l
@@ -60,6 +60,9 @@ $(OBJ)/ast_declaration.o: $(SRC)/ast_declaration.cpp
 	
 $(OBJ)/cmdline.o: $(SRC)/cmdline.cpp
 	$(CXX) -o $@ -c $^ -std=c++11 $(CPPFLAGS)
+
+$(OBJ)/external_tool.o: $(SRC)/external_tool.cpp
+	$(CXX) -o $@ -c $^ -std=c++11 $(CPPFLAGS)	
 
 all: $(OBJS)
 	$(CXX) -o $(BIN)/$(EXEC) $^ $(CPPFLAGS)
