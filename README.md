@@ -287,7 +287,7 @@ testbench AND_tb {
 	}
 };
 ```
-
+**Verilog** output:
 ```Verilog
 module AND(input a, b, output y);
 	assign y = a & b;
@@ -317,7 +317,7 @@ module AND_tb;
 endmodule
 ```
 
-Icarus compiler output:
+**Icarus compiler** output:
 ```
 a: 0 b: 0, y = 0
 a: 1 b: 0, y = 0
