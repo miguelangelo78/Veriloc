@@ -20,7 +20,8 @@ char is_qualifier_primitive(unsigned int qualif) {
 }
 
 char is_type_primitive(unsigned int type) {
-	return type == REG || type == WIRE;
+	return type == REG || type == WIRE
+		|| type == CHAR || type == INT || type == SHORT || type == LONG; /* XXX: temporary */
 }
 
 char is_var_primitive(declaration * var) {

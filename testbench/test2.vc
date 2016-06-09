@@ -1,7 +1,5 @@
-const SIZE = 10;
-
 module AND {
-public:
-	input a[SIZE:0], b[SIZE:0];
-	output y[SIZE:0] = a & b;
+private:
+	input char a, b;
+	output char b = a & b;
 };
