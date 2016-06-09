@@ -250,3 +250,77 @@ end
 endmodule
 
 ```
+
+# Example 6 - AND gate with Testbench and Task
+**Veriloc** code:
+```c++
+// declare and gate module:
+module AND {
+public:
+	input a, b; // 2 inputs
+	output y = a & b; // and 1 output
+};
+
+// declare testbench to test the module we just created:
+testbench AND_tb {
+	// declare variables:
+	wire q;
+	reg a,b;
+	AND my_and(a,b,q);
+
+	task calc(input new_b, input new_a) {
+		// assign new variables:
+		a = new_a;
+		b = new_b;
+		#1; // wait 1 picosecond
+		// display results:
+		$display("a: %b b: %b, y = %b", a, b, q);
+	}
+
+	// entry point is in the constructor:
+	AND_tb () {
+		// try all possible combinations:
+		calc(0,0);
+		calc(0,1);
+		calc(1,0);
+		calc(1,1);
+	}
+};
+```
+
+```Verilog
+module AND(input a, b, output y);
+	assign y = a & b;
+endmodule
+
+module AND_tb;
+	wire q;
+	reg a, b;
+	AND my_and(a, b, q);
+	task calc;
+	input  new_b;
+		input  new_a;
+	begin
+		a = new_a;
+		b = new_b;
+		#1;
+		$display("a: %b b: %b, y = %b", a, b, q);
+	end
+	endtask
+	initial
+	begin
+		calc(0, 0);
+		calc(0, 1);
+		calc(1, 0);
+		calc(1, 1);
+	end
+endmodule
+```
+
+Icarus compiler output:
+```
+a: 0 b: 0, y = 0
+a: 1 b: 0, y = 0
+a: 0 b: 1, y = 0
+a: 1 b: 1, y = 1
+```
