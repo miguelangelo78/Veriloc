@@ -36,7 +36,7 @@ char is_constructor(external_declaration_internal * ext_decl) {
 	return ext_decl->func_def && ext_decl->func_def->direct_decl && ext_decl->func_def->comp_statement->b_item_list;
 }
 
-/* Declarate a single primitive variable (no type nor specifier) */
+/* Declare a single primitive variable (no type nor specifier) */
 string decl_primitive(declarator * decl) {
 	string str = "";
 	string expr_l = "", expr_r = "";
@@ -65,7 +65,7 @@ string decl_primitive(declarator * decl) {
 	return str;
 }
 
-/* Declarate a single primitive variable (no type nor specifier) */
+/* Declare a single primitive variable (no type nor specifier) */
 string decl_primitive(init_declarator * id) {
 	return decl_primitive(id->decl);
 }
@@ -225,7 +225,7 @@ string ast_func_decl(function_definition * fdef, unsigned int idl) {
 	if(decl->param_type_list.size() == 1) {
 		int ctr = 0;
 		char carry = 0;
-		str += iden(idl);
+		str += iden(idl+1);
 		for(auto param : decl->param_type_list[0]->param_list->param_decl) {
 			if((!param->decl_spec->type_qualif.size() && !param->decl_spec->type_spec.size())
 					|| (param->decl_spec->type_spec.size() && !param->decl_spec->type_spec[0]->type)) carry = 1;

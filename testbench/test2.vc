@@ -1,26 +1,35 @@
+// declare and gate module:
 module AND {
 public:
-	input a, b;
-	output y = a & b;
+	// 2 inputs
+	input a[7:0];
+	input b[7:0];
+	output y[7:0] = a & b; // and 1 output
 };
 
+// declare testbench to test the module we just created:
 testbench AND_tb {
-	wire q;
-	reg a,b;
+	// declare variables:
+	wire q[7:0];
+	reg a[7:0];
+	reg b[7:0];
 	AND my_and(a,b,q);
 
+	task calc(input new_b[7:0], input new_a[7:0]) {
+		// assign new variables:
+		a = new_a;
+		b = new_b;
+		#1; // wait 1 picosecond
+		// display results:
+		$display("a: %b b: %b, y = %b", a, b, q);
+	}
+
+	// entry point is in the constructor:
 	AND_tb () {
-		$monitor(a,b,q);
-		$display("Hello world");
-		a=0;
-		b=0;
-		#100;
-		a=1;
-		#100;
-		a=0;
-		b=1;
-		#100;
-		a=1;
-		#100;
+		// try all possible combinations:
+		calc(0,0);
+		calc(0,1);
+		calc(1,0);
+		calc(1,1);
 	}
 };
