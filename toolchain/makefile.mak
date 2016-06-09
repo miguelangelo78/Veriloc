@@ -78,4 +78,4 @@ run:
 
 test%:
 	@cd $(makefile_dir)/..
-	@$(BIN)/$(EXEC) testbench/$@ --stdio -c icarus
+	@$(BIN)/$(EXEC) testbench/$@ -c icarus -s -r -g

@@ -1,3 +1,6 @@
+#ifndef HEADERS_H_
+#define HEADERS_H_
+
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
@@ -22,3 +25,5 @@ extern int sym_check_type(void);
 extern FILE * yyin;
 extern int lineno;
 extern char * yytext;
+
+#endif

@@ -1,11 +1,26 @@
 module AND {
 public:
 	input a, b;
-	output b = a & b;
+	output y = a & b;
+};
 
-	always {
-		switch(a[3:0]) {
-			case 4d0: break;
-		}
+testbench AND_tb {
+	wire q;
+	reg a,b;
+	AND my_and(a,b,q);
+
+	AND_tb () {
+		$monitor(a,b,q);
+		$display("Hello world");
+		a=0;
+		b=0;
+		#100;
+		a=1;
+		#100;
+		a=0;
+		b=1;
+		#100;
+		a=1;
+		#100;
 	}
 };

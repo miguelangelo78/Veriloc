@@ -10,15 +10,18 @@
 
 #include <algorithm>
 #include <string>
+#include <stdarg.h>
+#include <fstream>
 using namespace std;
 
 enum RUN_CMD {
 	UNKNOWN_CMD,
+	CLEANUP_TOOL,
 	COMPILER_ICARUS,
 	VIEWER_GTKWAVE
 };
 
 extern char compiler_type(string compiler_name);
-extern void external_execute(char run_cmd, string & source_code);
+extern void external_execute(char run_cmd, ...);
 
 #endif /* EXTERNAL_TOOL_H_ */

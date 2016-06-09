@@ -1,7 +1,6 @@
 #include <headers.h>
 #include <map>
 #include <utility>
-#include <fstream>
 #include <ast_to_verilog.h>
 #include <external_tool.h>
 
@@ -62,8 +61,6 @@ void write_to_file(string filename, string source_code) {
 	f.close();
 }
 
-
-
 int main(int argc, char ** argv) {
 	if(argc > 1) {
 		/* Read input source: */
@@ -93,39 +90,61 @@ int main(int argc, char ** argv) {
 		fclose(yyin);
 
 		/* Use the command line results: */
+		string filename = "(null)";
+		int skip_verilog_src = (int)cmd_has_opt('s'); /* Flag which indicates whether to skip to .o file or to generate .v file */
+
 		if(cmd_has_opt('o')) {
 			/* Output source code into user specified file */
-			string filename = cmd_query('o').second;
-			if(filename == "(null)") write_to_file("a.v", verilog_source);
-			else write_to_file(filename, verilog_source);
+			filename = cmd_query('o').second;
+			if(!skip_verilog_src) {
+				if(filename == "(null)")
+					write_to_file("a.v", verilog_source);
+				else
+					write_to_file(filename, verilog_source);
+			}
 		} else if(cmd_has_opt("stdio")) {
 			/* Output to standard io */
+			filename = "(stdio)";
 			cout << verilog_source;
-		} else {
-			WRITE_TO_DEFAULT:
+		} else if(!skip_verilog_src) {
 			/* Output to file a.v */
-			write_to_file("a.v", verilog_source);
+			filename = "a.v";
+			write_to_file(filename, verilog_source);
+		} else {
+			/* No output will occur */
+			filename = "(stdio)";
 		}
 
 		if(cmd_has_opt('c')) {
+			int compile_and_run = (int)cmd_has_opt('r');
 			/* Compile the result using an external Verilog compiler */
-			external_execute(compiler_type(cmd_query('c').second), verilog_source);
+			external_execute(
+					compiler_type(cmd_query('c').second), filename.c_str(),
+					skip_verilog_src, verilog_source.c_str(), compile_and_run);
 			if(cmd_has_opt('w')) {
 				/* Also feed the result into GTKWave */
-				external_execute(VIEWER_GTKWAVE, verilog_source);
+				external_execute(VIEWER_GTKWAVE, cmd_query('w').second.c_str());
 			}
+		}
+
+		if(cmd_has_opt('g')) {
+			/* Cleanup temporary object files */
+			external_execute(CLEANUP_TOOL, filename.c_str());
 		}
 
 #if DEBUG == 1
 		printf("\n\nDone.\n\nPress enter to exit");
 #endif
 	} else {
-		cout << "\nUsage: veriloc <filename> [options ... [ -o | --stdio | -c | -w ]]\n\n";
+		cout << "\nUsage: veriloc <filename> [options ... -o | --stdio | -c | -r | -w | -s | -g]\n\n";
 		cout << "Options:\n-o <filename>: Output result to file\n--stdio: Output Verilog code into standard input/output\n";
 		cout << "-c <compiler>: Compile result immediately with a known Verilog compiler\n";
 		cout << "****** Compilers supported: \n";
 		cout <<"    1 - Icarus Verilog (option: -c icarus);\n";
-		cout << "\n-w: Execute the VCD file from the compiler using GTKWave\n";
+		cout << "\n-w <VCD filename>: Execute the VCD file from the compiler using GTKWave\n";
+		cout << "-s: Skip Verilog generation code. Might produce the compiler's result only\n";
+		cout << "-r: Tell the compiler to run the code soon after it compiles\n";
+		cout << "-g: Cleans up all garbage (temporary files) after every process is done\n";
 		return 1;
 	}
 	return 0;
