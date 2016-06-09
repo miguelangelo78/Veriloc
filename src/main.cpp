@@ -68,22 +68,50 @@ int main(int argc, char ** argv) {
 		ast_init();
 		/* Parse it:  */
 		yyin = file;
+#if DEBUG == 1
 		printf(">> Parsing %s...\n", argv[1]);
+#endif
 		yyparse();
+#if DEBUG == 1
 		printf(">> Parsing of %s finished\n>> Converting AST (Abstract Syntax Tree) to Verilog\n",
 			argv[1]);
-#if DEBUG == 1
 		ast_dump();
 #endif
 		/* Convert tree into Verilog source code: */
 		string verilog_source = ast_convert(roots);
-
-		printf("%s", verilog_source.c_str());
-
 		fclose(yyin);
+
+		/* Use the command line results: */
+		if(cmd_has_opt('o')) {
+			/* Output source code into user specified file */
+
+		} else if(!cmd_has_opt("stdio")) {
+			/* Output to file a.v */
+
+		} else {
+			/* Output to standard io */
+			cout << verilog_source;
+		}
+
+		if(cmd_has_opt('c')) {
+			/* Compile the result using an external Verilog compiler */
+
+			if(cmd_has_opt('w')) {
+				/* Also feed the result into GTKWave */
+
+			}
+		}
+
+#if DEBUG == 1
 		printf("\n\nDone.\n\nPress enter to exit");
+#endif
 	} else {
-		cout << "Usage: veriloc [filename] [options ... [-o -c]]\n";
+		cout << "\nUsage: veriloc <filename> [options ... [ -o | --stdio | -c | -w ]]\n\n";
+		cout << "Options:\n-o <filename>: Output result to file\n--stdio: Output Verilog code into standard input/output\n";
+		cout << "-c <compiler>: Compile result immediately with a known Verilog compiler\n";
+		cout << "****** Compilers supported: \n";
+		cout <<"    1 - Icarus Verilog (option: -c icarus);\n";
+		cout << "\n-w: Execute the VCD file from the compiler using GTKWave\n";
 		return 1;
 	}
 	return 0;
