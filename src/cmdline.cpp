@@ -73,8 +73,8 @@ void cmdline_parse(int argc, char ** argv) {
 		char opt_type;
 		if((opt_type = is_opt(opt)))
 			if(opt_type == 1)
-				cmd_push_single(opt, string(argv[ctr]));
+				cmd_push_single(opt, ctr < argc ? string(argv[ctr]) : "(null)");
 			else if(opt_type == 2)
-				cmd_push(opt, string(argv[ctr]));
+				cmd_push(opt, ctr < argc ? string(argv[ctr]) : "(null)");
 	}
 }

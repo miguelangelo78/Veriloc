@@ -2,6 +2,10 @@ module AND {
 public:
 	input a, b;
 	output b = a & b;
-private:
-	reg a = 1;
+
+	always {
+		switch(a[3:0]) {
+			case 4d0: break;
+		}
+	}
 };
