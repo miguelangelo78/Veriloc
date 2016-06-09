@@ -95,11 +95,14 @@ int main(int argc, char ** argv) {
 		/* Use the command line results: */
 		if(cmd_has_opt('o')) {
 			/* Output source code into user specified file */
-			write_to_file(cmd_query('o').second, verilog_source);
+			string filename = cmd_query('o').second;
+			if(filename == "(null)") write_to_file("a.v", verilog_source);
+			else write_to_file(filename, verilog_source);
 		} else if(cmd_has_opt("stdio")) {
 			/* Output to standard io */
 			cout << verilog_source;
 		} else {
+			WRITE_TO_DEFAULT:
 			/* Output to file a.v */
 			write_to_file("a.v", verilog_source);
 		}
