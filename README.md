@@ -298,7 +298,7 @@ module AND_tb;
 	reg a, b;
 	AND my_and(a, b, q);
 	task calc;
-	input  new_b;
+		input  new_b;
 		input  new_a;
 	begin
 		a = new_a;
